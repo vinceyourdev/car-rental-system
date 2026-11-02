@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Dashboard - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    /* Base Layout */
+    :root {
+      --primary: #1a73e8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --card: #1e293b;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.15);
+      --shadow-lg: 0 4px 20px rgba(0,0,0,0.25);
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--dark);
+      color: var(--light);
+      min-height: 100vh;
+    }
+
+    /* Dashboard Container */
+    .dashboard-container {
+      display: flex;
+      min-height: 100vh;
+    }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px;
+      background: var(--card);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2.5rem;
+      box-shadow: var(--shadow-sm);
+      position: fixed;
+      top: 0;
+      bottom: 0;
+      left: 0;
+    }
+
+    .sidebar-logo {
+      font-size: 1.3rem;
+      font-weight: 700;
+      color: var(--primary);
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    .sidebar-menu {
+      list-style: none;
+      display: flex;
+      flex-direction: column;
+      gap: 0.5rem;
+    }
+
+    .sidebar-menu li a {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      padding: 0.9rem 1rem;
+      border-radius: 8px;
+      color: var(--muted);
+      text-decoration: none;
+      transition: all 0.25s ease;
+    }
+
+    .sidebar-menu li a:hover {
+      background: rgba(26, 115, 232, 0.15);
+      color: var(--light);
+    }
+
+    .sidebar-menu li a.active {
+      background: var(--primary);
+      color: white;
+      font-weight: 600;
+    }
+
+    .sidebar-menu li:last-child {
+      margin-top: auto;
+    }
+
+    .sidebar-menu li a#logout-link {
+      color: var(--danger);
+    }
+
+    .sidebar-menu li a#logout-link:hover {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+    }
+
+    /* Main Content */
+    .dashboard-main {
+      flex: 1;
+      margin-left: 260px;
+      padding: 2.5rem;
+    }
+
+    .dashboard-header {
+      margin-bottom: 2.5rem;
+    }
+
+    .dashboard-header h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+    }
+
+    .dashboard-header p {
+      color: var(--muted);
+      font-size: 1rem;
+    }
+
+    /* Stats Grid */
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.5rem;
+      margin-bottom: 3rem;
+    }
+
+    .stat-card {
+      background: var(--card);
+      padding: 1.75rem;
+      border-radius: var(--radius);
+      box-shadow: var(--shadow-sm);
+      transition: transform 0.2s, box-shadow 0.2s;
+    }
+
+    .stat-card:hover {
+      transform: translateY(-3px);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+      color: var(--muted);
+      font-size: 0.9rem;
+    }
+
+    /* Section Heading */
+    .section-heading {
+      font-size: 1.3rem;
+      margin-bottom: 1.25rem;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    /* Data Table */
+    .table-container {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 1.5rem;
+      box-shadow: var(--shadow-sm);
+      overflow-x: auto;
+    }
+
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    .data-table thead {
+      border-bottom: 2px solid #334155;
+    }
+
+    .data-table th {
+      text-align: left;
+      padding: 1rem;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .data-table td {
+      padding: 1rem;
+      border-bottom: 1px solid #334155;
+      font-size: 0.95rem;
+    }
+
+    .data-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .data-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    /* Badges */
+    .badge {
+      display: inline-block;
+      padding: 0.35rem 0.85rem;
+      border-radius: 20px;
+      font-size: 0.8rem;
+      font-weight: 600;
+    }
+
+    .badge-success {
+      background: rgba(16, 185, 129, 0.15);
+      color: var(--success);
+    }
+
+    .badge-pending {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--warning);
+    }
+
+    /* Links */
+    .action-link {
+      color: var(--primary);
+      text-decoration: none;
+      font-weight: 600;
+      transition: opacity 0.2s;
+    }
+
+    .action-link:hover {
+      opacity: 0.8;
+      text-decoration: underline;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .sidebar {
+        position: relative;
+        width: 100%;
+        flex-direction: row;
+        padding: 1rem;
+        overflow-x: auto;
+      }
+      .sidebar-menu {
+        flex-direction: row;
+        gap: 0.25rem;
+      }
+      .dashboard-container {
+        flex-direction: column;
+      }
+      .dashboard-main {
+        margin-left: 0;
+        padding: 1.5rem;
+      }
+      .stats-grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo">
+        <i class="fas fa-car"></i> RYPR
+      </div>
+      <ul class="sidebar-menu">
+        <li>
+          <a href="dashboard.html" class="active">
+            <i class="fas fa-tachometer-alt"></i>
+            Dashboard
+          </a>
+        </li>
+        <li>
+          <a href="vehicles.html">
+            <i class="fas fa-car"></i>
+            Book a Vehicle
+          </a>
+        </li>
+        <li>
+          <a href="transactions.html">
+            <i class="fas fa-history"></i>
+            My Bookings
+          </a>
+        </li>
+        <li>
+          <a href="payment.html">
+            <i class="fas fa-credit-card"></i>
+            Payments
+          </a>
+        </li>
+        <li>
+          <a href="#" id="logout-link">
+            <i class="fas fa-sign-out-alt"></i>
+            Logout
+          </a>
+        </li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="dashboard-main">
+      <div class="dashboard-header">
+        <h1 id="greeting">Welcome Back! 👋</h1>
+        <p>Here's your rental overview</p>
+      </div>
+
+      <!-- Statistics Cards -->
+      <div class="stats-grid">
+        <div class="stat-card">
+          <p class="stat-value" id="stat-total">4</p>
+          <p class="stat-label">Total Bookings</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-value" style="color: var(--success);" id="stat-completed">2</p>
+          <p class="stat-label">Completed</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-value" style="color: var(--warning);" id="stat-upcoming">2</p>
+          <p class="stat-label">Upcoming</p>
+        </div>
+        <div class="stat-card">
+          <p class="stat-value" id="stat-spent">₱15,500</p>
+          <p class="stat-label">Total Spent</p>
+        </div>
+      </div>
+
+      <!-- Recent Bookings Section -->
+      <h2 class="section-heading">
+        <i class="fas fa-list-alt" style="color: var(--primary);"></i>
+        Recent Bookings
+      </h2>
+      <div class="table-container">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Reference</th>
+              <th>Vehicle</th>
+              <th>Dates</th>
+              <th>Status</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody id="bookings-tbody">
+            <!-- Dynamic rows will inject here alongside default records -->
+            <tr>
+              <td>RYR-2026-001</td>
+              <td>Toyota Vios</td>
+              <td>Oct 26–28, 2026</td>
+              <td><span class="badge badge-success">Completed</span></td>
+              <td><a href="#" class="action-link">View</a></td>
+            </tr>
+            <tr>
+              <td>RYR-2026-002</td>
+              <td>Toyota Fortuner</td>
+              <td>Nov 5–7, 2026</td>
+              <td><span class="badge badge-pending">Upcoming</span></td>
+              <td><a href="payment.html" class="action-link">Pay Now</a></td>
+            </tr>
+            <tr>
+              <td>RYR-2026-003</td>
+              <td>Toyota Hiace</td>
+              <td>Oct 16–18, 2026</td>
+              <td><span class="badge badge-success">Completed</span></td>
+              <td><a href="#" class="action-link">View</a></td>
+            </tr>
+            <tr>
+              <td>RYR-2026-004</td>
+              <td>Mitsubishi Xpander</td>
+              <td>Nov 15–18, 2026</td>
+              <td><span class="badge badge-pending">Upcoming</span></td>
+              <td><a href="payment.html" class="action-link">Pay Now</a></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // Get saved user name from registration/login
+    const savedName = localStorage.getItem('userName');
+    const greetingEl = document.getElementById('greeting');
+    
+    if (savedName && savedName.trim() !== '') {
+      greetingEl.textContent = `Welcome Back, ${savedName}! 👋`;
+    }
+
+    // Load completed bookings from localStorage and integrate them
+    window.addEventListener('DOMContentLoaded', function() {
+      const tbody = document.getElementById('bookings-tbody');
+      const completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+
+      if (completedBookings.length > 0) {
+        let dynamicRowsHtml = '';
+        let additionalSpent = 0;
+        let additionalCompletedCount = 0;
+
+        completedBookings.forEach(booking => {
+          additionalSpent += booking.total;
+          additionalCompletedCount += 1;
+
+          dynamicRowsHtml += `
+            <tr>
+              <td>${booking.refNo}</td>
+              <td>${booking.vehicle}</td>
+              <td>${booking.dateCompleted} (${booking.days} days)</td>
+              <td><span class="badge badge-success">${booking.status}</span></td>
+              <td><a href="#" class="action-link">View</a></td>
+            </tr>
+          `;
+        });
+
+        // Prepend new completed bookings to the top of the table
+        tbody.innerHTML = dynamicRowsHtml + tbody.innerHTML;
+
+        // Update statistics counters dynamically
+        const baseTotalBookings = 4 + completedBookings.length;
+        const baseCompleted = 2 + additionalCompletedCount;
+        const baseSpent = 15500 + additionalSpent;
+
+        document.getElementById('stat-total').textContent = baseTotalBookings;
+        document.getElementById('stat-completed').textContent = baseCompleted;
+        document.getElementById('stat-spent').textContent = '₱' + baseSpent.toLocaleString('en-PH');
+      }
+    });
+
+    // Clear data on logout
+    document.getElementById('logout-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('userName');
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>

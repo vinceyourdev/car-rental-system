@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Process Payment - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #10b981;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --panel-bg: #334155;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --border: #475569;
+      --radius: 8px;
+      --danger: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg-dark); color: var(--light); min-height: 100vh; display: flex; }
+
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: white; }
+    .page-header p { color: var(--muted); margin-top: 0.3rem; font-size: 0.9rem; }
+
+    .card {
+      background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem;
+      margin-bottom: 1.5rem; border: 1px solid var(--border);
+    }
+    .card h2 { font-size: 1rem; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem; color: #a5b4fc; }
+
+    .form-row { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+    .form-group { display: flex; flex-direction: column; }
+    .form-group label { font-size: 0.8rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .form-group input, .form-group select {
+      padding: 0.7rem 0.9rem; background: var(--panel-bg); border: 1px solid var(--border);
+      border-radius: var(--radius); color: white; font-size: 0.9rem;
+    }
+    .form-group input:focus, .form-group select:focus { outline: none; border-color: var(--primary); }
+
+    .breakdown-panel {
+      background: var(--panel-bg); padding: 1.5rem; border-radius: var(--radius);
+      display: grid; grid-template-columns: 1fr auto; gap: 0.8rem 1rem;
+    }
+    .bd-label { color: var(--muted); font-size: 0.9rem; }
+    .bd-value { text-align: right; font-size: 0.9rem; }
+    .bd-total { 
+      grid-column: 1 / -1; display: flex; justify-content: space-between; 
+      margin-top: 0.5rem; padding-top: 1rem; border-top: 1px solid var(--border); 
+      font-weight: 600; font-size: 1rem; color: var(--success); 
+    }
+
+    .payment-option {
+      display: flex; align-items: center; gap: 0.8rem; padding: 1rem;
+      border: 1px solid var(--border); border-radius: var(--radius);
+      margin-bottom: 0.75rem; cursor: pointer; transition: all 0.2s;
+    }
+    .payment-option:hover { border-color: var(--primary); }
+    .payment-option.selected { border-color: var(--primary); background: rgba(37, 99, 235, 0.1); }
+    .payment-option input { width: auto; margin: 0; }
+    .pay-icon { font-size: 1.2rem; width: 24px; text-align: center; }
+    .pay-info h4 { font-size: 0.9rem; font-weight: 500; }
+    .pay-info p { font-size: 0.75rem; color: var(--muted); margin-top: 0.1rem; }
+
+    .payment-details {
+      display: none; margin-top: 1rem; padding: 1.25rem; background: var(--panel-bg); border-radius: var(--radius);
+    }
+    .payment-details.active { display: block; }
+    .proof-section { margin-top: 1rem; padding-top: 1rem; border-top: 1px solid var(--border); }
+    .proof-section label { display: block; margin-bottom: 0.5rem; font-size: 0.9rem; }
+    .proof-section input { margin-top: 0.25rem; }
+
+    .btn {
+      padding: 0.85rem 1.5rem; border: none; border-radius: var(--radius);
+      font-weight: 600; cursor: pointer; font-size: 0.95rem;
+      transition: all 0.2s;
+    }
+    .btn-primary { 
+      background: var(--primary); color: white; width: 100%; margin-top: 1.5rem; 
+    }
+    .btn-primary:hover:not(:disabled) { background: #1d4ed8; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .success-box {
+      display: none; margin-top: 1.5rem; padding: 2rem; 
+      background: rgba(16, 185, 129, 0.1); border: 1px solid var(--success); 
+      border-radius: var(--radius); text-align: center;
+    }
+    .success-box.active { display: block; }
+    .success-icon { font-size: 2.5rem; color: var(--success); margin-bottom: 1rem; }
+    .ref-text { 
+      font-family: monospace; background: rgba(37, 99, 235, 0.15); 
+      padding: 0.5rem 1rem; border-radius: 4px; display: inline-block; 
+      margin: 0.75rem 0; font-weight: 600; 
+    }
+    .hidden { display: none !important; }
+
+    /* Shorter, Contained Sidebar Styling matching Dashboard & Bookings */
+    .sidebar {
+      width: 260px;
+      background: var(--card-bg);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+      border-right: 1px solid var(--border);
+      border-radius: 12px;
+      position: fixed;
+      top: 1.5rem; 
+      left: 1.5rem;
+      height: fit-content;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      font-size: 1.3rem; 
+      font-weight: 700; 
+      color: var(--primary);
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+    .sidebar-menu {
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.5rem; 
+    }
+    .sidebar-menu li {
+      display: block;
+    }
+    .sidebar-menu li a {
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem;
+      padding: 0.8rem 1rem; 
+      border-radius: 8px; 
+      color: var(--muted);
+      text-decoration: none; 
+      transition: all 0.25s ease; 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    .sidebar-menu li a i { font-size: 1.1rem; width: 20px; text-align: center; }
+    .sidebar-menu li a:hover { background: rgba(37, 99, 235, 0.15); color: var(--light); }
+    .sidebar-menu li a.active { background: var(--primary); color: white; }
+    
+    .sidebar-footer {
+      list-style: none;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .sidebar-footer a {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.8rem 1rem; border-radius: 8px;
+      text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      color: #f87171; transition: all 0.25s ease; width: 100%;
+    }
+    .sidebar-footer a:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+    .main-wrapper { 
+      flex: 1; 
+      margin-left: 310px; 
+      padding: 2.5rem; 
+      width: calc(100% - 310px); 
+    }
+
+    .mobile-header {
+      display: none; position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      padding: 0 1.25rem; align-items: center; justify-content: space-between; z-index: 99;
+    }
+    .mobile-header .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1rem; color: var(--primary); }
+    .menu-toggle { background: none; border: none; color: var(--light); font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 90; }
+
+    @media (max-width: 992px) {
+      .mobile-header { display: flex; }
+      .sidebar { transform: translateX(-120%); top: 0; left: 0; height: 100vh; border-radius: 0; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.active { display: block; }
+      .main-wrapper { margin-left: 0; width: 100%; padding: 1.5rem; padding-top: 5rem; }
+    }
+    @media (max-width: 768px) {
+      .form-row { grid-template-columns: 1fr 1fr; }
+    }
+    @media (max-width: 480px) {
+      .form-row { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Top Header -->
+  <div class="mobile-header">
+    <div class="brand">
+      <i class="fas fa-car"></i> RYPR
+    </div>
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Side Navigation Bar -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <i class="fas fa-car"></i> RYPR
+    </a>
+    
+    <ul class="sidebar-menu">
+      <li>
+        <a href="dashboard.html">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="vehicles.html">
+          <i class="fas fa-car"></i> Book a Vehicle
+        </a>
+      </li>
+      <li>
+        <a href="transactions.html">
+          <i class="fas fa-history"></i> My Bookings
+        </a>
+      </li>
+      <li>
+        <a href="payment.html" class="active">
+          <i class="fas fa-credit-card"></i> Payments
+        </a>
+      </li>
+    </ul>
+
+    <ul class="sidebar-footer">
+      <li>
+        <a href="#" id="logout-link" onclick="logoutUser(event)">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <div class="container">
+      <div class="page-header">
+        <h1><i class="fas fa-credit-card"></i> Process Payment</h1>
+        <p>Review your booking details and complete your payment</p>
+      </div>
+
+      <!-- Booking Details & Price Breakdown -->
+      <div class="card" id="booking-card">
+        <h2><i class="fas fa-calculator"></i> Booking Details & Price Breakdown</h2>
+        
+        <div class="form-row">
+          <div class="form-group">
+            <label>Select Vehicle</label>
+            <select id="vehicle-select" onchange="calculateTotal()">
+              <option value="" disabled>-- Select Vehicle --</option>
+              <option value="1500">Toyota Vios</option>
+              <option value="1400">Mitsubishi Mirage</option>
+              <option value="3500">Toyota Hiace</option>
+              <option value="4500">Toyota Fortuner</option>
+              <option value="2800">Mitsubishi Xpander</option>
+              <option value="2000">Multicab Pick-up</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label>Full Name</label>
+            <input type="text" id="full-name" placeholder="Enter your full name" oninput="checkReady()">
+          </div>
+          <div class="form-group">
+            <label>Pick-up Date</label>
+            <input type="date" id="pickup-date" onchange="calculateTotal()">
+          </div>
+          <div class="form-group">
+            <label>Return Date</label>
+            <input type="date" id="return-date" onchange="calculateTotal()">
+          </div>
+        </div>
+
+        <div class="breakdown-panel">
+          <span class="bd-label">Vehicle:</span>
+          <span class="bd-value" id="bd-vehicle">—</span>
+
+          <span class="bd-label">Daily Rate:</span>
+          <span class="bd-value" id="bd-rate">—</span>
+
+          <span class="bd-label">Rental Duration:</span>
+          <span class="bd-value" id="bd-duration">—</span>
+
+          <span class="bd-label">Subtotal:</span>
+          <span class="bd-value" id="bd-subtotal">—</span>
+
+          <div class="bd-total">
+            <span>TOTAL AMOUNT DUE:</span>
+            <span id="bd-total">₱0.00</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Method -->
+      <div class="card" id="payment-card">
+        <h2><i class="fas fa-wallet"></i> Select Payment Method</h2>
+
+        <label class="payment-option" id="opt-gcash" onclick="selectMethod('gcash')">
+          <input type="radio" name="payment" value="gcash">
+          <i class="fas fa-mobile-alt pay-icon" style="color: #00C652;"></i>
+          <div class="pay-info">
+            <h4>GCash</h4>
+            <p>Send payment to our GCash account</p>
+          </div>
+        </label>
+
+        <label class="payment-option selected" id="opt-maya" onclick="selectMethod('maya')">
+          <input type="radio" name="payment" value="maya" checked>
+          <i class="fas fa-wallet pay-icon" style="color: #33C5FF;"></i>
+          <div class="pay-info">
+            <h4>Maya</h4>
+            <p>Pay via Maya wallet</p>
+          </div>
+        </label>
+
+        <label class="payment-option" id="opt-card" onclick="selectMethod('card')">
+          <input type="radio" name="payment" value="card">
+          <i class="fas fa-credit-card pay-icon" style="color: #818cf8;"></i>
+          <div class="pay-info">
+            <h4>Debit / Credit Card</h4>
+            <p>Visa, Mastercard — secure payment</p>
+          </div>
+        </label>
+
+        <label class="payment-option" id="opt-cash" onclick="selectMethod('cash')">
+          <input type="radio" name="payment" value="cash">
+          <i class="fas fa-money-bill-wave pay-icon" style="color: var(--success);"></i>
+          <div class="pay-info">
+            <h4>Cash on Pick-up</h4>
+            <p>Pay at our office upon collection</p>
+          </div>
+        </label>
+
+        <!-- GCash Panel -->
+        <div class="payment-details" id="panel-gcash">
+          <p><strong>GCash Number:</strong> 0920-600-7621</p>
+          <p><strong>Account Name:</strong> Rent Your Perfect Ride</p>
+          <div class="proof-section">
+            <label>Upload Proof of Payment <span style="color: #f87171;">*</span></label>
+            <input type="file" id="gcash-proof" accept="image/*,.pdf" onchange="checkReady()">
+          </div>
+        </div>
+
+        <!-- Maya Panel -->
+        <div class="payment-details active" id="panel-maya">
+          <p><strong>Maya Number:</strong> 0920-600-7621</p>
+          <p><strong>Account Name:</strong> Rent Your Perfect Ride</p>
+          <div class="proof-section">
+            <label>Upload Proof of Payment <span style="color: #f87171;">*</span></label>
+            <input type="file" id="maya-proof" accept="image/*,.pdf" onchange="checkReady()">
+          </div>
+        </div>
+
+        <!-- Card Panel -->
+        <div class="payment-details" id="panel-card">
+          <div class="form-row" style="grid-template-columns: 1fr 1fr;">
+            <div class="form-group">
+              <label>Card Number</label>
+              <input type="text" id="card-num" placeholder="1234 5678 9012 3456" maxlength="19" oninput="checkReady()">
+            </div>
+            <div class="form-group">
+              <label>Cardholder Name</label>
+              <input type="text" id="card-name" placeholder="Juan Dela Cruz" oninput="checkReady()">
+            </div>
+            <div class="form-group">
+              <label>Expiry Date</label>
+              <input type="text" id="card-exp" placeholder="MM/YY" maxlength="5" oninput="checkReady()">
+            </div>
+            <div class="form-group">
+              <label>CVV</label>
+              <input type="password" id="card-cvv" placeholder="•••" maxlength="4" oninput="checkReady()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash Panel -->
+        <div class="payment-details" id="panel-cash">
+          <p style="color: var(--success);"><i class="fas fa-info-circle"></i> Your booking will be reserved once confirmed.</p>
+        </div>
+
+        <button class="btn btn-primary" id="confirm-btn" onclick="confirmBooking()" disabled>
+          <i class="fas fa-check-circle"></i> Confirm Booking
+        </button>
+
+        <!-- Success Confirmation Box -->
+        <div class="success-box" id="success-box">
+          <div class="success-icon"><i class="fas fa-check-circle"></i></div>
+          <h3>Booking Confirmed! 🎉</h3>
+          <p style="color: var(--muted); margin-top: 0.5rem;">
+            Thank you, <strong id="confirm-name">—</strong>! Your payment has been successfully recorded.
+          </p>
+          <p style="color: var(--muted); margin-top: 0.3rem;">
+            <strong>Vehicle:</strong> <span id="confirm-vehicle">—</span><br>
+            <strong>Duration:</strong> <span id="confirm-dates">—</span><br>
+            <strong>Total Amount:</strong> <span id="confirm-amount">—</span><br>
+            <strong>Payment Method:</strong> <span id="confirm-method">—</span>
+          </p>
+          <div class="ref-text">
+            Reference No: <strong id="ref-display">RYPR-XXXXXXXX</strong>
+          </div>
+          <br>
+          <a href="transactions.html" class="btn btn-primary" style="display: inline-block; margin-top: 1rem; text-decoration: none;">
+            <i class="fas fa-receipt"></i> View in Transactions
+          </a>
+        </div>
+      </div>
+    </div>
+  </main>
+
+<script>
+  let selectedMethod = 'maya';
+  let totalAmount = 0;
+  let calculatedDays = 0;
+  let currentRefNo = '';
+
+  function toggleSidebar() {
+    document.getElementById('sidebar').classList.toggle('open');
+    document.getElementById('sidebar-overlay').classList.toggle('active');
+  }
+
+  function logoutUser(e) {
+    e.preventDefault();
+    if (confirm('Are you sure you want to log out?')) {
+      localStorage.removeItem('userName');
+      window.location.href = 'index.html';
+    }
+  }
+
+  function generateRef() {
+    return 'RYPR-' + Date.now().toString().slice(-8);
+  }
+
+  function formatPeso(amount) {
+    return '₱' + Number(amount).toLocaleString('en-PH', { minimumFractionDigits: 2 });
+  }
+
+  window.onload = function() {
+    const userName = localStorage.getItem('userName');
+    if (userName) {
+      document.getElementById('full-name').value = userName;
+    }
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const paramVehicle = urlParams.get('vehicle');
+    const paramAmount = urlParams.get('amount');
+    const paramRef = urlParams.get('ref');
+
+    const vehicleSelect = document.getElementById('vehicle-select');
+    let matchedBooking = null;
+
+    if (paramRef) {
+      currentRefNo = paramRef;
+      const completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+      const transactionRecords = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+      
+      matchedBooking = completedBookings.find(b => b.refNo === paramRef) || 
+                       transactionRecords.find(t => t.transactionId === paramRef);
+    }
+
+    if (matchedBooking) {
+      const vehicleName = matchedBooking.vehicle || paramVehicle;
+      const amount = matchedBooking.total || matchedBooking.totalAmount || paramAmount;
+      const days = matchedBooking.days || 1;
+
+      for (let i = 0; i < vehicleSelect.options.length; i++) {
+        let optText = vehicleSelect.options[i].text.toLowerCase().trim();
+        if (optText === vehicleName.toLowerCase().trim()) {
+          vehicleSelect.selectedIndex = i;
+          break;
+        }
+      }
+
+      totalAmount = parseFloat(amount);
+      calculatedDays = days;
+
+      document.getElementById('bd-vehicle').textContent = vehicleName;
+      document.getElementById('bd-rate').textContent = formatPeso(vehicleSelect.value || 0);
+      document.getElementById('bd-duration').textContent = `${days} day${days > 1 ? 's' : ''}`;
+      document.getElementById('bd-subtotal').textContent = formatPeso(totalAmount);
+      document.getElementById('bd-total').textContent = formatPeso(totalAmount);
+
+      if (matchedBooking.dateCompleted && matchedBooking.dateCompleted.includes('to')) {
+        const dates = matchedBooking.dateCompleted.split(' to ');
+        if (dates.length === 2) {
+          document.getElementById('pickup-date').value = dates[0].trim();
+          document.getElementById('return-date').value = dates[1].trim();
+        }
+      }
+    } else {
+      if (paramVehicle) {
+        for (let i = 0; i < vehicleSelect.options.length; i++) {
+          let optText = vehicleSelect.options[i].text.toLowerCase().trim();
+          if (optText === paramVehicle.toLowerCase().trim()) {
+            vehicleSelect.selectedIndex = i;
+            break;
+          }
+        }
+      }
+      currentRefNo = paramRef ? paramRef : generateRef();
+
+      if (paramAmount) {
+        totalAmount = parseFloat(paramAmount);
+        document.getElementById('bd-total').textContent = formatPeso(totalAmount);
+        document.getElementById('bd-subtotal').textContent = formatPeso(totalAmount);
+        document.getElementById('bd-vehicle').textContent = paramVehicle || 'Selected Vehicle';
+        document.getElementById('bd-rate').textContent = formatPeso(vehicleSelect.value || 0);
+        document.getElementById('bd-duration').textContent = '1 day';
+      } else {
+        calculateTotal();
+      }
+    }
+
+    checkReady();
+  };
+
+  function calculateTotal() {
+    const select = document.getElementById('vehicle-select');
+    const pickup = document.getElementById('pickup-date').value;
+    const returnDate = document.getElementById('return-date').value;
+
+    if (!select.value) return;
+
+    const dailyRate = parseInt(select.value);
+    const vehicleName = select.options[select.selectedIndex].text;
+
+    document.getElementById('bd-vehicle').textContent = vehicleName;
+    document.getElementById('bd-rate').textContent = formatPeso(dailyRate);
+
+    if (pickup && returnDate) {
+      const start = new Date(pickup);
+      const end = new Date(returnDate);
+      const days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+      if (days > 0) {
+        calculatedDays = days;
+        const subtotal = dailyRate * days;
+        totalAmount = subtotal;
+
+        document.getElementById('bd-duration').textContent = `${days} day${days > 1 ? 's' : ''}`;
+        document.getElementById('bd-subtotal').textContent = formatPeso(subtotal);
+        document.getElementById('bd-total').textContent = formatPeso(totalAmount);
+      }
+    }
+    checkReady();
+  }
+
+  function selectMethod(method) {
+    selectedMethod = method;
+    document.querySelectorAll('.payment-option').forEach(opt => opt.classList.remove('selected'));
+    document.getElementById(`opt-${method}`).classList.add('selected');
+
+    document.querySelectorAll('.payment-details').forEach(panel => panel.classList.remove('active'));
+    document.getElementById(`panel-${method}`).classList.add('active');
+
+    checkReady();
+  }
+
+  function checkReady() {
+    const name = document.getElementById('full-name').value.trim();
+    const confirmBtn = document.getElementById('confirm-btn');
+    let isProofUploaded = true;
+
+    if (selectedMethod === 'gcash') {
+      const fileInput = document.getElementById('gcash-proof');
+      isProofUploaded = fileInput.files && fileInput.files.length > 0;
+    } else if (selectedMethod === 'maya') {
+      const fileInput = document.getElementById('maya-proof');
+      isProofUploaded = fileInput.files && fileInput.files.length > 0;
+    }
+
+    confirmBtn.disabled = !(name !== '' && totalAmount > 0 && isProofUploaded);
+  }
+
+  function confirmBooking() {
+    const name = document.getElementById('full-name').value.trim();
+    const select = document.getElementById('vehicle-select');
+    const vehicleName = select.options[select.selectedIndex]?.text || '—';
+    const pickup = document.getElementById('pickup-date').value || 'N/A';
+    const returnDate = document.getElementById('return-date').value || 'N/A';
+
+    if (!name || totalAmount <= 0) {
+      alert('⚠️ Please fill out all required details properly.');
+      return;
+    }
+
+    const completedBooking = {
+      refNo: currentRefNo,
+      vehicle: vehicleName,
+      days: calculatedDays || 1,
+      total: totalAmount,
+      status: 'Completed',
+      dateCompleted: `${pickup} to ${returnDate}`
+    };
+
+    let completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+    completedBookings = completedBookings.filter(b => b.refNo !== currentRefNo);
+    completedBookings.push(completedBooking);
+    localStorage.setItem('completedBookings', JSON.stringify(completedBookings));
+
+    document.getElementById('confirm-name').textContent = name;
+    document.getElementById('confirm-vehicle').textContent = vehicleName;
+    document.getElementById('confirm-dates').textContent = `${pickup} to ${returnDate}`;
+    document.getElementById('confirm-amount').textContent = formatPeso(totalAmount);
+    document.getElementById('confirm-method').textContent = selectedMethod.toUpperCase();
+    document.getElementById('ref-display').textContent = currentRefNo;
+
+    document.getElementById('confirm-btn').classList.add('hidden');
+    document.getElementById('success-box').classList.add('active');
+  }
+</script>
+</body>
+</html>

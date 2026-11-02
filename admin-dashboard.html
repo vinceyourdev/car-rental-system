@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --card: #1e293b;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --border: #334155;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--dark); color: var(--light); min-height: 100vh; display: flex; }
+
+    /* Sidebar */
+    .sidebar {
+      width: 260px; background: var(--card); padding: 2rem 1.5rem;
+      display: flex; flex-direction: column; gap: 2.5rem;
+      position: fixed; top: 0; bottom: 0; left: 0;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.2);
+    }
+    .sidebar-logo { font-size: 1.3rem; font-weight: 700; color: #60a5fa; display: flex; align-items: center; gap: 0.75rem; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; flex: 1; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem;
+      border-radius: 8px; color: var(--muted); text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      transition: all 0.2s;
+    }
+    .sidebar-menu li a:hover, .sidebar-menu li a.active { background: var(--primary); color: white; }
+    .sidebar-menu li:last-child { margin-top: auto; }
+    .sidebar-menu li a.logout { color: #f87171; }
+
+    /* Main Content */
+    .main-content { flex: 1; margin-left: 260px; padding: 2.5rem; }
+    .page-header { margin-bottom: 2rem; display: flex; justify-content: space-between; align-items: center; }
+    .page-header h1 { font-size: 1.8rem; }
+    .admin-badge { background: rgba(37, 99, 235, 0.2); color: #93c5fd; padding: 0.4rem 1rem; border-radius: 20px; font-size: 0.85rem; font-weight: 600; }
+
+    /* Stat Cards */
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 1.5rem; margin-bottom: 2.5rem; }
+    .stat-card { background: var(--card); padding: 1.5rem; border-radius: var(--radius); border: 1px solid var(--border); }
+    .stat-card .icon { font-size: 1.5rem; color: var(--primary); margin-bottom: 0.5rem; }
+    .stat-card h3 { font-size: 1.8rem; margin-bottom: 0.2rem; }
+    .stat-card p { color: var(--muted); font-size: 0.85rem; }
+
+    /* Table Panel */
+    .table-panel { background: var(--card); border-radius: var(--radius); padding: 1.5rem; border: 1px solid var(--border); }
+    .panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.85rem; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+    .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .data-table tr:hover { background: rgba(255,255,255,0.02); }
+
+    /* Badges & Actions */
+    .badge { padding: 0.35rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 600; display: inline-block; }
+    .badge-pending { background: rgba(245, 158, 11, 0.15); color: var(--warning); }
+    .badge-completed { background: rgba(16, 185, 129, 0.15); color: var(--success); }
+
+    .btn-action { padding: 0.4rem 0.8rem; border-radius: 6px; border: none; cursor: pointer; font-size: 0.8rem; font-weight: 600; margin-right: 0.3rem; transition: opacity 0.2s; }
+    .btn-approve { background: var(--success); color: white; }
+    .btn-delete { background: var(--danger); color: white; }
+    .btn-action:hover { opacity: 0.85; }
+
+    @media (max-width: 768px) {
+      .sidebar { position: relative; width: 100%; flex-direction: row; padding: 1rem; }
+      body { flex-direction: column; }
+      .main-content { margin-left: 0; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <i class="fas fa-user-shield"></i> ADMIN PORTAL
+    </div>
+    <ul class="sidebar-menu">
+      <li><a href="admin-dashboard.html" class="active"><i class="fas fa-chart-line"></i> Master Overview</a></li>
+      <li><a href="vehicles.html"><i class="fas fa-car"></i> View Vehicle Fleet</a></li>
+      <li><a href="#" onclick="logoutAdmin(event)" class="logout"><i class="fas fa-sign-out-alt"></i> Admin Logout</a></li>
+    </ul>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="page-header">
+      <div>
+        <h1>System Overview</h1>
+        <p style="color: var(--muted);">Manage customer reservations, track total revenue, and update order statuses.</p>
+      </div>
+      <span class="admin-badge"><i class="fas fa-shield-alt"></i> Administrator Active</span>
+    </div>
+
+    <!-- System Stats -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="icon"><i class="fas fa-coins"></i></div>
+        <h3 id="adm-total-revenue">₱0.00</h3>
+        <p>Total Revenue (Completed)</p>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="color: var(--warning);"><i class="fas fa-clock"></i></div>
+        <h3 id="adm-pending-count">0</h3>
+        <p>Pending / Unpaid Orders</p>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="color: var(--success);"><i class="fas fa-check-circle"></i></div>
+        <h3 id="adm-completed-count">0</h3>
+        <p>Completed Bookings</p>
+      </div>
+      <div class="stat-card">
+        <div class="icon" style="color: #a5b4fc;"><i class="fas fa-list-alt"></i></div>
+        <h3 id="adm-total-orders">0</h3>
+        <p>Total Reservations Handled</p>
+      </div>
+    </div>
+
+    <!-- Master Bookings Table -->
+    <div class="table-panel">
+      <div class="panel-header">
+        <h2><i class="fas fa-receipt"></i> All Customer Reservations</h2>
+      </div>
+
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Ref No.</th>
+            <th>Vehicle</th>
+            <th>Dates / Duration</th>
+            <th>Total Amount</th>
+            <th>Status</th>
+            <th>Management Actions</th>
+          </tr>
+        </thead>
+        <tbody id="admin-table-body">
+          <!-- Dynamically populated -->
+        </tbody>
+      </table>
+    </div>
+  </main>
+
+  <script>
+    // Verify Admin Authorization
+    if (localStorage.getItem('userRole') !== 'admin') {
+      alert('⚠️ Access Denied! Admin privileges required.');
+      window.location.href = 'login.html';
+    }
+
+    function logoutAdmin(e) {
+      e.preventDefault();
+      if (confirm('Log out from Admin Panel?')) {
+        localStorage.removeItem('userRole');
+        localStorage.removeItem('userName');
+        window.location.href = 'login.html';
+      }
+    }
+
+    // Load and render all customer bookings across system
+    function renderAdminDashboard() {
+      const completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+      const transactionRecords = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+
+      // Unified record list sorted newest first
+      const allRecords = [
+        ...completedBookings.map(b => ({
+          refNo: b.refNo,
+          vehicle: b.vehicle,
+          dates: `${b.dateCompleted} (${b.days || 1} days)`,
+          total: Number(b.total),
+          status: b.status || 'Completed'
+        })),
+        ...transactionRecords.map(t => ({
+          refNo: t.transactionId,
+          vehicle: t.vehicle,
+          dates: t.pickupDate || '—',
+          total: Number(t.totalAmount || 0),
+          status: t.status || 'Pending'
+        }))
+      ].reverse();
+
+      // Stats Calculations
+      const completed = allRecords.filter(r => r.status === 'Completed' || r.status === 'Paid');
+      const pending = allRecords.filter(r => r.status === 'Pending' || r.status === 'Upcoming');
+      const revenue = completed.reduce((sum, r) => sum + r.total, 0);
+
+      document.getElementById('adm-total-revenue').textContent = '₱' + revenue.toLocaleString('en-PH', {minimumFractionDigits: 2});
+      document.getElementById('adm-pending-count').textContent = pending.length;
+      document.getElementById('adm-completed-count').textContent = completed.length;
+      document.getElementById('adm-total-orders').textContent = allRecords.length;
+
+      const tbody = document.getElementById('admin-table-body');
+      
+      if (allRecords.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; color:var(--muted); padding:2rem;">No customer bookings found in the system.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = allRecords.map(item => {
+        const isPaid = item.status === 'Completed' || item.status === 'Paid';
+        const badgeClass = isPaid ? 'badge-completed' : 'badge-pending';
+
+        return `
+          <tr>
+            <td><strong>${item.refNo}</strong></td>
+            <td>${item.vehicle}</td>
+            <td>${item.dates}</td>
+            <td>₱${item.total.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+            <td><span class="badge ${badgeClass}">${item.status}</span></td>
+            <td>
+              ${!isPaid ? `<button class="btn-action btn-approve" onclick="approveBooking('${item.refNo}')"><i class="fas fa-check"></i> Approve & Complete</button>` : ''}
+              <button class="btn-action btn-delete" onclick="adminDeleteBooking('${item.refNo}')"><i class="fas fa-trash-alt"></i> Cancel</button>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    // Approve booking status from Pending -> Completed
+    function approveBooking(refNo) {
+      if (confirm(`Approve payment and mark booking ${refNo} as Completed?`)) {
+        let completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+        let transactionRecords = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+
+        // Find record in transactions and move to completedBookings
+        const foundIndex = transactionRecords.findIndex(t => t.transactionId === refNo);
+        if (foundIndex !== -1) {
+          const item = transactionRecords[foundIndex];
+          completedBookings.push({
+            refNo: item.transactionId,
+            vehicle: item.vehicle,
+            days: 1,
+            total: item.totalAmount,
+            status: 'Completed',
+            dateCompleted: item.pickupDate || new Date().toLocaleDateString('en-PH')
+          });
+          transactionRecords.splice(foundIndex, 1);
+        } else {
+          // If already in completedBookings as upcoming, update status
+          completedBookings = completedBookings.map(b => b.refNo === refNo ? { ...b, status: 'Completed' } : b);
+        }
+
+        localStorage.setItem('completedBookings', JSON.stringify(completedBookings));
+        localStorage.setItem('transactionRecords', JSON.stringify(transactionRecords));
+        renderAdminDashboard();
+      }
+    }
+
+    // Admin Delete / Cancel Booking
+    function adminDeleteBooking(refNo) {
+      if (confirm(`Are you sure you want to cancel reservation ${refNo}?`)) {
+        let completedBookings = JSON.parse(localStorage.getItem('completedBookings')) || [];
+        let transactionRecords = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+
+        completedBookings = completedBookings.filter(b => b.refNo !== refNo);
+        transactionRecords = transactionRecords.filter(t => t.transactionId !== refNo);
+
+        localStorage.setItem('completedBookings', JSON.stringify(completedBookings));
+        localStorage.setItem('transactionRecords', JSON.stringify(transactionRecords));
+        renderAdminDashboard();
+      }
+    }
+
+    window.onload = renderAdminDashboard;
+  </script>
+</body>
+</html>

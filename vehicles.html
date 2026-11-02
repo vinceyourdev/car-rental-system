@@ -1,0 +1,548 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vehicle Fleet - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --success: #10b981;
+      --danger: #ef4444;
+      --warning: #f59e0b;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --panel-bg: #334155;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --border: #475569;
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg-dark); color: var(--light); min-height: 100vh; display: flex; flex-direction: column; }
+
+    /* Navbar */
+    .navbar {
+      background: var(--card-bg);
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 100;
+    }
+    .nav-brand {
+      color: var(--light);
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+    .nav-brand i { color: var(--primary); }
+    .nav-links { display: flex; list-style: none; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      transition: color 0.2s;
+    }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+
+    .btn {
+      padding: 0.6rem 1.25rem;
+      border-radius: 8px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      font-size: 0.9rem;
+    }
+    .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.1); }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover:not(:disabled) { background: #4f46e5; }
+    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; background: var(--border); }
+    .btn-danger { background: var(--danger); color: white; }
+    .btn-danger:hover { opacity: 0.85; }
+
+    /* Container */
+    .container { max-width: 1200px; margin: 0 auto; padding: 3rem 1.5rem; width: 100%; flex: 1; }
+    .page-header { margin-bottom: 2.5rem; text-align: center; }
+    .page-header h1 { font-size: 2.2rem; margin-bottom: 0.5rem; display: flex; justify-content: center; align-items: center; gap: 0.75rem; }
+    .page-header p { color: var(--muted); font-size: 1rem; }
+
+    /* Vehicle Grid Layout */
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+    .vehicle-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.2s, border-color 0.2s;
+    }
+    .vehicle-card:hover { transform: translateY(-4px); border-color: var(--primary); }
+
+    /* Maximized Car Image Container */
+    .vehicle-img-container {
+      height: 200px;
+      width: 100%;
+      background: var(--panel-bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .vehicle-img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: center;
+      transition: transform 0.3s ease;
+    }
+    .vehicle-card:hover .vehicle-img-container img { transform: scale(1.05); }
+
+    .vehicle-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      padding: 0.3rem 0.8rem; border-radius: 20px; font-size: 0.75rem; font-weight: 700;
+      z-index: 2;
+      backdrop-filter: blur(4px);
+    }
+    .badge-available { background: rgba(16, 185, 129, 0.9); color: #ffffff; }
+    .badge-booked { background: rgba(239, 68, 68, 0.9); color: #ffffff; }
+
+    .vehicle-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
+    .vehicle-title { font-size: 1.25rem; font-weight: 700; margin-bottom: 0.5rem; color: white; }
+    .vehicle-price { font-size: 1.1rem; color: #a5b4fc; font-weight: 700; margin-bottom: 1rem; }
+    
+    .vehicle-specs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem 1rem;
+      margin-bottom: 1.2rem; font-size: 0.85rem; color: var(--muted);
+    }
+    .vehicle-specs i { color: var(--primary); margin-right: 0.4rem; width: 16px; }
+
+    /* Date Selection Box per Card with Visual Calendar Cursors */
+    .card-date-box {
+      background: var(--panel-bg);
+      padding: 0.9rem;
+      border-radius: 8px;
+      margin-bottom: 1.2rem;
+      border: 1px solid var(--border);
+    }
+    .card-date-box label {
+      display: block;
+      font-size: 0.75rem;
+      color: var(--muted);
+      margin-bottom: 0.2rem;
+    }
+    .card-date-box input[type="date"] {
+      width: 100%;
+      padding: 0.5rem;
+      background: var(--bg-dark);
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      color: white;
+      font-size: 0.85rem;
+      margin-bottom: 0.6rem;
+      cursor: pointer;
+    }
+    .card-date-box input[type="date"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+    .card-date-box input:focus { outline: none; border-color: var(--primary); }
+    .card-date-box .estimated-total {
+      font-size: 0.85rem;
+      color: var(--success);
+      font-weight: 600;
+      text-align: right;
+      border-top: 1px solid rgba(255,255,255,0.1);
+      padding-top: 0.5rem;
+      margin-top: 0.2rem;
+    }
+
+    /* Admin Panel Styling */
+    .admin-panel { background: var(--card-bg); border-radius: var(--radius); padding: 2rem; border: 1px solid var(--border); }
+    .admin-panel-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; flex-wrap: wrap; gap: 1rem; }
+    .data-table { width: 100%; border-collapse: collapse; }
+    .data-table th { text-align: left; padding: 1rem; color: var(--muted); font-size: 0.85rem; border-bottom: 2px solid var(--border); text-transform: uppercase; }
+    .data-table td { padding: 1rem; border-bottom: 1px solid var(--border); font-size: 0.9rem; }
+    .data-table tr:hover { background: rgba(255,255,255,0.02); }
+
+    /* Add Vehicle Form Box */
+    .add-car-box { background: var(--panel-bg); padding: 1.5rem; border-radius: var(--radius); margin-bottom: 2rem; display: none; }
+    .add-car-box.active { display: block; }
+    .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 1rem; margin-bottom: 1rem; }
+    .form-group label { display: block; font-size: 0.8rem; color: var(--muted); margin-bottom: 0.3rem; }
+    .form-group input { width: 100%; padding: 0.7rem; background: var(--bg-dark); border: 1px solid var(--border); border-radius: 6px; color: white; }
+
+    footer {
+      background: var(--card-bg); color: var(--muted); text-align: center;
+      padding: 2rem; border-top: 1px solid var(--border); margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem; flex-direction: column; gap: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Smart Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand"><i class="fas fa-car"></i> RENT YOUR PERFECT RIDE</a>
+    <ul class="nav-links" id="nav-menu-links">
+      <!-- Populated dynamically via JS -->
+    </ul>
+    <div class="nav-actions">
+      <span id="user-greeting" style="font-weight: 600; color: #93c5fd; font-size: 0.9rem;"></span>
+      <a href="payment.html" id="payment-nav-btn" class="btn btn-outline"><i class="fas fa-credit-card"></i> Payments</a>
+    </div>
+  </nav>
+
+  <!-- Container -->
+  <div class="container" id="main-container">
+    <!-- Populated dynamically via JS -->
+  </div>
+
+  <footer>
+    <p>&copy; 2026 Rent Your Perfect Ride. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    const userRole = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName');
+
+    if (userName) {
+      document.getElementById('user-greeting').textContent = `Hello, ${userName}`;
+    }
+
+    // Default Fleet Data
+    const defaultFleet = [
+      { id: '1', name: 'Toyota Vios', rate: 1500, seats: 5, type: 'Automatic', image: 'car_image/vios.avif' },
+      { id: '2', name: 'Mitsubishi Mirage G4', rate: 1400, seats: 5, type: 'Manual / Auto', image: 'car_image/mirage.jpeg' },
+      { id: '3', name: 'Toyota Hiace', rate: 3500, seats: 12, type: 'Manual', image: 'car_image/hiace.jpeg' },
+      { id: '4', name: 'Toyota Fortuner', rate: 4500, seats: 7, type: 'Automatic', image: 'car_image/fortuner.jpeg' },
+      { id: '5', name: 'Mitsubishi Xpander', rate: 2800, seats: 7, type: 'Automatic', image: 'car_image/xpander.jpeg' },
+      { id: '6', name: 'Multicab Pick-up', rate: 2000, seats: 2, type: 'Manual', image: 'car_image/pickup.jpeg' }
+    ];
+
+    function getFleet() {
+      const currentVersion = 'v5';
+      const savedVersion = localStorage.getItem('fleetVersion');
+      let fleet = JSON.parse(localStorage.getItem('vehicleFleet'));
+
+      if (!fleet || savedVersion !== currentVersion) {
+        fleet = defaultFleet;
+        localStorage.setItem('vehicleFleet', JSON.stringify(fleet));
+        localStorage.setItem('fleetVersion', currentVersion);
+      }
+      return fleet;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const navLinks = document.getElementById('nav-menu-links');
+      const paymentBtn = document.getElementById('payment-nav-btn');
+
+      if (userRole === 'admin') {
+        navLinks.innerHTML = `
+          <li><a href="admin-dashboard.html" style="background: var(--primary); color: white; padding: 0.5rem 1rem; border-radius: 6px;"><i class="fas fa-arrow-left"></i> Back to Master Overview</a></li>
+        `;
+        if (paymentBtn) paymentBtn.style.display = 'none';
+        renderAdminFleetView();
+      } else {
+        navLinks.innerHTML = `
+          <li><a href="index.html">Home</a></li>
+          <li><a href="vehicles.html" class="active">Vehicles</a></li>
+          <li><a href="dashboard.html">Dashboard</a></li>
+          <li><a href="transactions.html">My Bookings</a></li>
+        `;
+        renderCustomerFleetView();
+      }
+    });
+
+    // --- CUSTOMER FLEET VIEW WITH NATIVE CALENDAR PICKERS ---
+    function renderCustomerFleetView() {
+      const fleet = getFleet();
+      const container = document.getElementById('main-container');
+
+      const completed = JSON.parse(localStorage.getItem('completedBookings')) || [];
+      const pending = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+      
+      const paidBookings = [...completed, ...pending].filter(b => 
+        b.status === 'Completed' || b.status === 'Paid'
+      );
+
+      const todayStr = new Date().toISOString().split('T')[0];
+
+      container.innerHTML = `
+        <div class="page-header">
+          <h1><i class="fas fa-car-side"></i> Explore Our Vehicle Fleet</h1>
+          <p>Click the calendar icons or fields to pick your dates, view live estimates, and book.</p>
+        </div>
+        <div class="vehicle-grid">
+          ${fleet.map(car => {
+            const isBooked = paidBookings.some(b => 
+              b.vehicle && b.vehicle.toLowerCase().trim() === car.name.toLowerCase().trim()
+            );
+
+            const badgeClass = isBooked ? 'badge-booked' : 'badge-available';
+            const badgeText = isBooked ? 'Booked / Unavailable' : 'Available';
+
+            return `
+              <div class="vehicle-card" data-vehicle="${car.name}">
+                <div class="vehicle-img-container">
+                  <img src="${car.image}" alt="${car.name}">
+                  <span class="vehicle-badge ${badgeClass}">${badgeText}</span>
+                </div>
+                <div class="vehicle-body">
+                  <div class="vehicle-title">${car.name}</div>
+                  <div class="vehicle-price">₱${Number(car.rate).toLocaleString()} <span style="font-size:0.8rem; color:var(--muted); font-weight:normal;">/ day</span></div>
+                  <div class="vehicle-specs">
+                    <div><i class="fas fa-user-friends"></i> ${car.seats} Seats</div>
+                    <div><i class="fas fa-cog"></i> ${car.type}</div>
+                  </div>
+
+                  ${!isBooked ? `
+                    <div class="card-date-box">
+                      <label><i class="fas fa-calendar-alt"></i> Pick-up Date (Click to Open Calendar)</label>
+                      <input type="date" id="pickup-${car.id}" value="${todayStr}" min="${todayStr}" onchange="updateCardEstimate('${car.id}', ${car.rate})">
+                      
+                      <label><i class="fas fa-calendar-check"></i> Return Date (Click to Open Calendar)</label>
+                      <input type="date" id="return-${car.id}" value="${todayStr}" min="${todayStr}" onchange="updateCardEstimate('${car.id}', ${car.rate})">
+                      
+                      <div class="estimated-total" id="total-display-${car.id}">Est. Total: ₱${Number(car.rate).toLocaleString()} (1 day)</div>
+                    </div>
+                  ` : ''}
+
+                  <div class="vehicle-actions" style="margin-top:auto;">
+                    <button class="btn btn-primary btn-book" style="width:100%; justify-content:center;" 
+                      ${isBooked ? 'disabled' : ''} 
+                      onclick="bookVehicle('${car.name}', ${car.rate}, '${car.id}')">
+                      <i class="fas fa-calendar-check"></i> ${isBooked ? 'Currently Booked' : 'Book Now'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            `;
+          }).join('')}
+        </div>
+      `;
+    }
+
+    function updateCardEstimate(carId, dailyRate) {
+      const pickupInput = document.getElementById(`pickup-${carId}`).value;
+      const returnInput = document.getElementById(`return-${carId}`).value;
+      const display = document.getElementById(`total-display-${carId}`);
+
+      if (pickupInput && returnInput) {
+        const start = new Date(pickupInput);
+        const end = new Date(returnInput);
+        let days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+        if (days < 1) days = 1; // Minimum 1 day calculation
+        const total = days * dailyRate;
+        display.textContent = `Est. Total: ₱${total.toLocaleString()} (${days} day${days > 1 ? 's' : ''})`;
+      }
+    }
+
+    function bookVehicle(vehicleName, dailyRate, carId) {
+      if (userRole === 'admin') {
+        alert('ℹ️ You are currently logged in as Administrator. Switch to a customer account to make bookings.');
+        return;
+      }
+
+      if (!userName) {
+        alert('⚠️ Please log in first to book a vehicle.');
+        window.location.href = 'login.html';
+        return;
+      }
+
+      const pickupInput = document.getElementById(`pickup-${carId}`).value;
+      const returnInput = document.getElementById(`return-${carId}`).value;
+
+      if (!pickupInput || !returnInput) {
+        alert('⚠️ Please select both pick-up and return dates.');
+        return;
+      }
+
+      const start = new Date(pickupInput);
+      const end = new Date(returnInput);
+      let days = Math.ceil((end - start) / (1000 * 60 * 60 * 24));
+
+      if (days < 1) {
+        alert('⚠️ Return date must be equal to or after the pick-up date.');
+        return;
+      }
+
+      const totalAmount = days * dailyRate;
+      const refNo = 'RYPR-' + Date.now().toString().slice(-8);
+      
+      const newTransaction = {
+        transactionId: refNo,
+        vehicle: vehicleName,
+        pickupDate: pickupInput,
+        returnDate: returnInput,
+        days: days,
+        totalAmount: totalAmount,
+        status: 'Pending'
+      };
+
+      let transactionRecords = JSON.parse(localStorage.getItem('transactionRecords')) || [];
+      transactionRecords.push(newTransaction);
+      localStorage.setItem('transactionRecords', JSON.stringify(transactionRecords));
+
+      window.location.href = `payment.html?ref=${refNo}&vehicle=${encodeURIComponent(vehicleName)}&amount=${totalAmount}`;
+    }
+
+    // --- ADMIN FLEET VIEW ---
+    function renderAdminFleetView() {
+      const fleet = getFleet();
+      const container = document.getElementById('main-container');
+
+      container.innerHTML = `
+        <div class="page-header">
+          <h1><i class="fas fa-cogs"></i> Admin Fleet Management</h1>
+          <p>Add new vehicles, update rates, or remove items from your fleet.</p>
+        </div>
+
+        <div class="admin-panel">
+          <div class="admin-panel-header">
+            <h2><i class="fas fa-car"></i> Current Fleet Inventory</h2>
+            <button class="btn btn-primary" onclick="toggleAddCarForm()">
+              <i class="fas fa-plus"></i> Add New Vehicle
+            </button>
+          </div>
+
+          <div class="add-car-box" id="add-car-form-box">
+            <h3 style="margin-bottom: 1rem; color: #a5b4fc;"><i class="fas fa-plus-circle"></i> Add Vehicle to Fleet</h3>
+            <div class="form-row">
+              <div class="form-group">
+                <label>Vehicle Name / Model</label>
+                <input type="text" id="new-car-name" placeholder="e.g. Honda Civic">
+              </div>
+              <div class="form-group">
+                <label>Daily Rate (₱)</label>
+                <input type="number" id="new-car-rate" placeholder="e.g. 2500">
+              </div>
+              <div class="form-group">
+                <label>Capacity (Seats)</label>
+                <input type="number" id="new-car-seats" placeholder="e.g. 5">
+              </div>
+              <div class="form-group">
+                <label>Transmission / Type</label>
+                <input type="text" id="new-car-type" placeholder="e.g. Automatic">
+              </div>
+              <div class="form-group">
+                <label>Upload Vehicle Photo (Optional)</label>
+                <input type="file" id="new-car-image" accept="image/*">
+              </div>
+            </div>
+            <button class="btn btn-primary" onclick="saveNewVehicle()"><i class="fas fa-save"></i> Save Vehicle</button>
+          </div>
+
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Preview</th>
+                <th>Vehicle Model</th>
+                <th>Daily Rate</th>
+                <th>Capacity</th>
+                <th>Type</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${fleet.map(car => `
+                <tr>
+                  <td><strong>#${car.id}</strong></td>
+                  <td><img src="${car.image}" style="width:50px; height:35px; object-fit:cover; border-radius:4px;"></td>
+                  <td>${car.name}</td>
+                  <td>₱${Number(car.rate).toLocaleString()}</td>
+                  <td>${car.seats} Seats</td>
+                  <td>${car.type}</td>
+                  <td>
+                    <button class="btn btn-danger" style="padding: 0.3rem 0.6rem; font-size: 0.8rem;" onclick="deleteFleetCar('${car.id}')">
+                      <i class="fas fa-trash"></i> Remove
+                    </button>
+                  </td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      `;
+    }
+
+    function toggleAddCarForm() {
+      const box = document.getElementById('add-car-form-box');
+      box.classList.toggle('active');
+    }
+
+    function saveNewVehicle() {
+      const name = document.getElementById('new-car-name').value.trim();
+      const rate = document.getElementById('new-car-rate').value.trim();
+      const seats = document.getElementById('new-car-seats').value.trim();
+      const type = document.getElementById('new-car-type').value.trim();
+      const fileInput = document.getElementById('new-car-image');
+
+      if (!name || !rate || !seats || !type) {
+        alert('⚠️ Please fill out all vehicle details.');
+        return;
+      }
+
+      const file = fileInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+          storeVehicleInFleet(name, rate, seats, type, e.target.result);
+        };
+        reader.readAsDataURL(file);
+      } else {
+        storeVehicleInFleet(name, rate, seats, type, 'car_image/pickup.jpeg');
+      }
+    }
+
+    function storeVehicleInFleet(name, rate, seats, type, imageUrl) {
+      let fleet = getFleet();
+      const newCar = {
+        id: Date.now().toString().slice(-4),
+        name: name,
+        rate: Number(rate),
+        seats: Number(seats),
+        type: type,
+        image: imageUrl
+      };
+
+      fleet.push(newCar);
+      localStorage.setItem('vehicleFleet', JSON.stringify(fleet));
+      renderAdminFleetView();
+      alert('Vehicle successfully added to fleet!');
+    }
+
+    function deleteFleetCar(id) {
+      if (confirm('Are you sure you want to remove this vehicle from the fleet?')) {
+        let fleet = getFleet();
+        fleet = fleet.filter(car => car.id !== id);
+        localStorage.setItem('vehicleFleet', JSON.stringify(fleet));
+        renderAdminFleetView();
+      }
+    }
+  </script>
+</body>
+</html>

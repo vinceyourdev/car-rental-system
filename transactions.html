@@ -1,0 +1,452 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Bookings & Transactions - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  
+  <style>
+    :root {
+      --primary: #2563eb;
+      --success: #10b981;
+      --bg-dark: #0f172a;
+      --card-bg: #1e293b;
+      --panel-bg: #334155;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --border: #475569;
+      --radius: 8px;
+      --danger: #ef4444;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--bg-dark); color: var(--light); min-height: 100vh; display: flex; }
+
+    .container { max-width: 1200px; margin: 0 auto; width: 100%; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 0.5rem; color: white; }
+    .page-header p { color: var(--muted); margin-top: 0.3rem; font-size: 0.9rem; }
+
+    .card {
+      background: var(--card-bg); border-radius: var(--radius); padding: 1.5rem;
+      margin-bottom: 1.5rem; border: 1px solid var(--border);
+    }
+
+    /* Header Actions Bar (Filter Tabs + Delete All Button) */
+    .table-actions-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.5rem;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    /* Filter Tabs */
+    .filter-tabs {
+      display: flex;
+      gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+    .filter-btn {
+      background: var(--panel-bg);
+      border: 1px solid var(--border);
+      color: var(--muted);
+      padding: 0.5rem 1.2rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .filter-btn:hover { color: white; border-color: var(--primary); }
+    .filter-btn.active { background: var(--primary); color: white; border-color: var(--primary); }
+
+    /* Data Table styling */
+    .table-container { overflow-x: auto; }
+    .data-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+    .data-table th {
+      color: var(--muted);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .data-table td {
+      padding: 1.1rem 1rem;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(71, 85, 105, 0.4);
+      color: var(--light);
+    }
+    .data-table tr:hover { background: rgba(255, 255, 255, 0.02); }
+
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.75rem;
+      border-radius: 20px;
+      font-size: 0.75rem;
+      font-weight: 600;
+    }
+    .badge-pending, .badge-upcoming { background: rgba(245, 158, 11, 0.15); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.3); }
+    .badge-completed, .badge-paid { background: rgba(16, 185, 129, 0.15); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+
+    /* Buttons */
+    .btn {
+      padding: 0.4rem 0.9rem;
+      border-radius: 6px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      font-size: 0.85rem;
+      transition: all 0.2s ease;
+      height: 32px;
+      line-height: 1;
+    }
+    .btn-primary { background: var(--primary); color: white; }
+    .btn-primary:hover { background: #1d4ed8; }
+
+    .btn-delete {
+      background: var(--danger);
+      color: white;
+    }
+    .btn-delete:hover { background: #dc2626; }
+
+    .btn-delete-all {
+      background: rgba(239, 68, 68, 0.15);
+      color: var(--danger);
+      border: 1px solid rgba(239, 68, 68, 0.3);
+      padding: 0.5rem 1rem;
+      border-radius: 20px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.2s ease;
+      height: auto;
+    }
+    .btn-delete-all:hover {
+      background: var(--danger);
+      color: white;
+    }
+
+    /* Shorter, Contained Sidebar Styling matching Dashboard */
+    .sidebar {
+      width: 260px;
+      background: var(--card-bg);
+      padding: 2rem 1.5rem;
+      display: flex;
+      flex-direction: column;
+      gap: 2rem;
+      box-shadow: 2px 0 8px rgba(0,0,0,0.15);
+      border-right: 1px solid var(--border);
+      border-radius: 12px;
+      position: fixed;
+      top: 1.5rem; 
+      left: 1.5rem;
+      height: fit-content;
+      z-index: 100;
+      transition: transform 0.3s ease;
+    }
+    .sidebar-logo {
+      font-size: 1.3rem; 
+      font-weight: 700; 
+      color: var(--primary);
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+    .sidebar-menu {
+      list-style: none; 
+      display: flex; 
+      flex-direction: column; 
+      gap: 0.5rem; 
+    }
+    .sidebar-menu li {
+      display: block;
+    }
+    .sidebar-menu li a {
+      display: flex; 
+      align-items: center; 
+      gap: 0.75rem;
+      padding: 0.8rem 1rem; 
+      border-radius: 8px; 
+      color: var(--muted);
+      text-decoration: none; 
+      transition: all 0.25s ease; 
+      font-weight: 600; 
+      font-size: 0.9rem;
+      width: 100%;
+    }
+    .sidebar-menu li a i { font-size: 1.1rem; width: 20px; text-align: center; }
+    .sidebar-menu li a:hover { background: rgba(37, 99, 235, 0.15); color: var(--light); }
+    .sidebar-menu li a.active { background: var(--primary); color: white; }
+    
+    .sidebar-footer {
+      list-style: none;
+      border-top: 1px solid var(--border);
+      padding-top: 1rem;
+    }
+    .sidebar-footer a {
+      display: flex; align-items: center; gap: 0.75rem;
+      padding: 0.8rem 1rem; border-radius: 8px;
+      text-decoration: none; font-weight: 600; font-size: 0.9rem;
+      color: #f87171; transition: all 0.25s ease; width: 100%;
+    }
+    .sidebar-footer a:hover { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+
+    .main-wrapper { flex: 1; margin-left: 310px; padding: 2.5rem; width: calc(100% - 310px); }
+
+    .mobile-header {
+      display: none; position: fixed; top: 0; left: 0; right: 0; height: 60px;
+      background: var(--card-bg); border-bottom: 1px solid var(--border);
+      padding: 0 1.25rem; align-items: center; justify-content: space-between; z-index: 99;
+    }
+    .mobile-header .brand { display: flex; align-items: center; gap: 0.5rem; font-weight: 700; font-size: 1rem; color: var(--primary); }
+    .menu-toggle { background: none; border: none; color: var(--light); font-size: 1.4rem; cursor: pointer; }
+    .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0, 0, 0, 0.6); z-index: 90; }
+
+    @media (max-width: 992px) {
+      .mobile-header { display: flex; }
+      .sidebar { transform: translateX(-120%); top: 0; left: 0; height: 100vh; border-radius: 0; }
+      .sidebar.open { transform: translateX(0); }
+      .sidebar-overlay.active { display: block; }
+      .main-wrapper { margin-left: 0; width: 100%; padding: 1.5rem; padding-top: 5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Mobile Top Header -->
+  <div class="mobile-header">
+    <div class="brand">
+      <i class="fas fa-car"></i> RYPR
+    </div>
+    <button class="menu-toggle" onclick="toggleSidebar()"><i class="fas fa-bars"></i></button>
+  </div>
+
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+  <!-- Side Navigation Bar -->
+  <aside class="sidebar" id="sidebar">
+    <a href="index.html" class="sidebar-logo">
+      <i class="fas fa-car"></i> RYPR
+    </a>
+    
+    <ul class="sidebar-menu">
+      <li>
+        <a href="dashboard.html">
+          <i class="fas fa-tachometer-alt"></i> Dashboard
+        </a>
+      </li>
+      <li>
+        <a href="vehicles.html">
+          <i class="fas fa-car"></i> Book a Vehicle
+        </a>
+      </li>
+      <li>
+        <a href="transactions.html" class="active">
+          <i class="fas fa-history"></i> My Bookings
+        </a>
+      </li>
+      <li>
+        <a href="payment.html">
+          <i class="fas fa-credit-card"></i> Payments
+        </a>
+      </li>
+    </ul>
+
+    <ul class="sidebar-footer">
+      <li>
+        <a href="#" id="logout-link" onclick="logoutUser(event)">
+          <i class="fas fa-sign-out-alt"></i> Logout
+        </a>
+      </li>
+    </ul>
+  </aside>
+
+  <!-- Main Content Wrapper -->
+  <main class="main-wrapper">
+    <div class="container">
+      <div class="page-header">
+        <h1><i class="fas fa-history"></i> My Bookings & Transactions</h1>
+        <p>View all your completed payments and upcoming reservations</p>
+      </div>
+
+      <!-- Bookings Table Card -->
+      <div class="card">
+        <!-- Table Actions Bar (Filter Tabs + Delete All Button) -->
+        <div class="table-actions-bar">
+          <div class="filter-tabs">
+            <button class="filter-btn active" onclick="filterTable('all', this)">All Transactions</button>
+            <button class="filter-btn" onclick="filterTable('completed', this)">Completed</button>
+            <button class="filter-btn" onclick="filterTable('pending', this)">Upcoming / Pending</button>
+          </div>
+          <button class="btn-delete-all" onclick="deleteAllTransactions()">
+            <i class="fas fa-trash-alt"></i> Delete All Transactions
+          </button>
+        </div>
+
+        <div class="table-container">
+          <table class="data-table">
+            <thead>
+              <tr>
+                <th>Reference No.</th>
+                <th>Vehicle</th>
+                <th>Dates / Duration</th>
+                <th>Total Amount</th>
+                <th>Status</th>
+                <th>Action</th>
+              </tr>
+            </thead>
+            <tbody id="transactions-table-body">
+              <tr>
+                <td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">Loading bookings...</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    const userName = localStorage.getItem('userName');
+    if (!userName) {
+      alert('⚠️ Please login to access your bookings.');
+      window.location.href = 'login.html';
+    }
+
+    let allRecords = [];
+    let currentFilter = 'all';
+
+    function toggleSidebar() {
+      document.getElementById('sidebar').classList.toggle('open');
+      document.getElementById('sidebar-overlay').classList.toggle('active');
+    }
+
+    function logoutUser(e) {
+      e.preventDefault();
+      if (confirm('Are you sure you want to log out?')) {
+        localStorage.removeItem('userName');
+        window.location.href = 'index.html';
+      }
+    }
+
+    function deleteBooking(refNo) {
+      if (confirm(`Are you sure you want to cancel/delete booking ${refNo}?`)) {
+        let completedBookings = JSON.parse(localStorage.getItem('completedBookings') || '[]');
+        completedBookings = completedBookings.filter(b => b.refNo !== refNo);
+        localStorage.setItem('completedBookings', JSON.stringify(completedBookings));
+
+        let transactionRecords = JSON.parse(localStorage.getItem('transactionRecords') || '[]');
+        transactionRecords = transactionRecords.filter(t => t.transactionId !== refNo);
+        localStorage.setItem('transactionRecords', JSON.stringify(transactionRecords));
+
+        loadTransactions();
+      }
+    }
+
+    // New Function to Delete All Transactions & Sync with Dashboard
+    function deleteAllTransactions() {
+      if (allRecords.length === 0) {
+        alert('⚠️ There are no transactions to delete.');
+        return;
+      }
+
+      if (confirm('⚠️ Are you sure you want to delete ALL transaction records? This action cannot be undone and will also clear them from your dashboard.')) {
+        localStorage.removeItem('completedBookings');
+        localStorage.removeItem('transactionRecords');
+        loadTransactions();
+      }
+    }
+
+    function filterTable(type, btn) {
+      currentFilter = type;
+      document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderTable(allRecords);
+    }
+
+    function renderTable(records) {
+      const tbody = document.getElementById('transactions-table-body');
+
+      let filtered = records;
+      if (currentFilter === 'completed') {
+        filtered = records.filter(r => r.status === 'Completed' || r.status === 'Paid');
+      } else if (currentFilter === 'pending') {
+        filtered = records.filter(r => r.status === 'Upcoming' || r.status === 'Pending');
+      }
+
+      if (filtered.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" style="text-align: center; color: var(--muted); padding: 2rem;">No transactions found.</td></tr>`;
+        return;
+      }
+
+      tbody.innerHTML = filtered.map(tx => {
+        const isCompleted = tx.status === 'Completed' || tx.status === 'Paid';
+        const badgeClass = isCompleted ? 'badge-completed' : 'badge-pending';
+        const payUrl = `payment.html?ref=${encodeURIComponent(tx.id)}&vehicle=${encodeURIComponent(tx.vehicle)}&amount=${tx.total}`;
+
+        return `
+          <tr>
+            <td><strong>${tx.id}</strong></td>
+            <td>${tx.vehicle}</td>
+            <td>${tx.date}</td>
+            <td>₱${tx.total.toLocaleString('en-PH', {minimumFractionDigits:2})}</td>
+            <td><span class="badge ${badgeClass}">${tx.status}</span></td>
+            <td>
+              <div style="display: flex; gap: 0.5rem; align-items: center;">
+                ${!isCompleted ? `<a href="${payUrl}" class="btn btn-primary">Pay Now</a>` : ''}
+                <button class="btn btn-delete" onclick="deleteBooking('${tx.id}')">
+                  <i class="fas fa-trash-alt"></i> Delete
+                </button>
+              </div>
+            </td>
+          </tr>
+        `;
+      }).join('');
+    }
+
+    function loadTransactions() {
+      const completedBookings = JSON.parse(localStorage.getItem('completedBookings') || '[]');
+      const transactionRecords = JSON.parse(localStorage.getItem('transactionRecords') || '[]');
+      
+      allRecords = [
+        ...completedBookings.map(b => ({
+          id: b.refNo,
+          vehicle: b.vehicle,
+          date: b.dateCompleted || '—',
+          total: Number(b.total || 0),
+          status: b.status || 'Completed'
+        })),
+        ...transactionRecords.map(t => ({
+          id: t.transactionId,
+          vehicle: t.vehicle,
+          date: t.pickupDate || '—',
+          total: Number(t.totalAmount || 0),
+          status: t.status || 'Pending'
+        }))
+      ];
+
+      allRecords.reverse();
+      renderTable(allRecords);
+    }
+
+    loadTransactions();
+  </script>
+</body>
+</html>

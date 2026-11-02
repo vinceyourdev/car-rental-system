@@ -1,0 +1,510 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Rent Your Perfect Ride - Modern Car Rentals</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #6366f1;
+      --primary-hover: #4f46e5;
+      --secondary: #0f172a;
+      --card-bg: #1e293b;
+      --panel-bg: #111827;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --border: #475569;
+      --radius: 16px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body { background: var(--secondary); color: var(--light); min-height: 100vh; display: flex; flex-direction: column; overflow-x: hidden; }
+
+    /* Navbar */
+    .navbar {
+      background: rgba(30, 41, 59, 0.95);
+      backdrop-filter: blur(12px);
+      padding: 1rem 2.5rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 1px solid var(--border);
+      position: sticky; top: 0; z-index: 1000;
+    }
+    .nav-brand {
+      color: var(--light);
+      font-size: 1.25rem;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      text-decoration: none;
+    }
+    .nav-brand i { color: var(--primary); font-size: 1.5rem; }
+    .nav-links { display: flex; list-style: none; gap: 1.5rem; align-items: center; }
+    .nav-links a {
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.95rem;
+      transition: color 0.2s;
+      cursor: pointer;
+    }
+    .nav-links a:hover, .nav-links a.active { color: white; }
+    .nav-actions { display: flex; gap: 1rem; align-items: center; }
+
+    .btn {
+      padding: 0.65rem 1.4rem;
+      border-radius: 10px;
+      font-weight: 600;
+      border: none;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: all 0.25s ease;
+      font-size: 0.95rem;
+    }
+    .btn-outline { background: transparent; color: white; border: 1px solid var(--border); }
+    .btn-outline:hover { border-color: var(--primary); background: rgba(99, 102, 241, 0.15); }
+    .btn-primary { background: var(--primary); color: white; box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3); }
+    .btn-primary:hover { background: var(--primary-hover); transform: translateY(-2px); }
+
+    /* Hero Section */
+    .hero {
+      position: relative;
+      padding: 5rem 1.5rem 6rem;
+      text-align: center;
+      background: radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.15) 0%, transparent 60%);
+    }
+    .hero-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(99, 102, 241, 0.1);
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      color: #a5b4fc;
+      padding: 0.4rem 1rem;
+      border-radius: 30px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      margin-bottom: 1.5rem;
+    }
+    .hero h1 {
+      font-size: 3.2rem;
+      font-weight: 800;
+      line-height: 1.2;
+      margin-bottom: 1rem;
+      background: linear-gradient(135deg, #ffffff 30%, #a5b4fc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+    .hero p {
+      font-size: 1.15rem;
+      color: var(--muted);
+      max-width: 650px;
+      margin: 0 auto 2.5rem;
+    }
+
+    /* Floating Search / Filter Bar */
+    .hero-search-bar {
+      max-width: 900px;
+      margin: 0 auto;
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 1rem;
+      display: grid;
+      grid-template-columns: 2fr 1.5fr 1fr;
+      gap: 1rem;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+    }
+    .search-field {
+      display: flex;
+      flex-direction: column;
+      text-align: left;
+      padding: 0.5rem 1rem;
+      border-right: 1px solid var(--border);
+    }
+    .search-field:last-child { border-right: none; }
+    .search-field label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; font-weight: 700; margin-bottom: 0.3rem; }
+    .search-field input, .search-field select {
+      background: transparent;
+      border: none;
+      color: white;
+      font-size: 0.95rem;
+      outline: none;
+      font-weight: 600;
+    }
+    .search-field select option { background: var(--card-bg); color: white; }
+
+    /* Section Header */
+    .section-container { max-width: 1200px; margin: 0 auto; padding: 4rem 1.5rem; width: 100%; }
+    .section-title-box { text-align: center; margin-bottom: 3rem; }
+    .section-title-box h2 { font-size: 2.2rem; font-weight: 700; margin-bottom: 0.5rem; }
+    .section-title-box p { color: var(--muted); font-size: 1rem; }
+
+    /* Feature Fleet Grid */
+    .vehicle-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+      gap: 2rem;
+    }
+    .vehicle-card {
+      background: var(--card-bg);
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.3s ease, border-color 0.3s ease;
+    }
+    .vehicle-card:hover { transform: translateY(-6px); border-color: var(--primary); }
+
+    .vehicle-img-container {
+      height: 220px;
+      background: var(--panel-bg);
+      position: relative;
+      overflow: hidden;
+    }
+    .vehicle-img-container img {
+      width: 100%; height: 100%;
+      object-fit: cover;
+      transition: transform 0.4s ease;
+    }
+    .vehicle-card:hover .vehicle-img-container img { transform: scale(1.06); }
+
+    .vehicle-body { padding: 1.5rem; display: flex; flex-direction: column; flex: 1; }
+    .vehicle-title { font-size: 1.3rem; font-weight: 700; margin-bottom: 0.4rem; color: white; }
+    .vehicle-price { font-size: 1.15rem; color: #a5b4fc; font-weight: 700; margin-bottom: 1rem; }
+    .vehicle-specs {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 0.6rem;
+      margin-bottom: 1.5rem; font-size: 0.85rem; color: var(--muted);
+      background: rgba(15, 23, 42, 0.6);
+      padding: 0.8rem; border-radius: 10px;
+    }
+    .vehicle-specs i { color: var(--primary); margin-right: 0.4rem; }
+
+    /* "Why Choose Us" Grid */
+    .features-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 2rem;
+    }
+    .feature-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border);
+      padding: 2rem;
+      border-radius: var(--radius);
+      text-align: center;
+      transition: transform 0.3s ease;
+    }
+    .feature-card:hover { transform: translateY(-4px); }
+    .feature-icon {
+      width: 60px; height: 60px;
+      border-radius: 50%;
+      background: rgba(99, 102, 241, 0.15);
+      color: var(--primary);
+      display: flex; justify-content: center; align-items: center;
+      font-size: 1.5rem;
+      margin: 0 auto 1.25rem;
+    }
+    .feature-card h3 { font-size: 1.15rem; margin-bottom: 0.5rem; color: white; }
+    .feature-card p { color: var(--muted); font-size: 0.9rem; line-height: 1.5; }
+
+    /* How It Works Steps */
+    .steps-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 2rem;
+      position: relative;
+    }
+    .step-box { text-align: center; padding: 1.5rem; }
+    .step-number {
+      width: 45px; height: 45px;
+      background: var(--primary);
+      color: white;
+      border-radius: 50%;
+      font-weight: 800;
+      display: flex; justify-content: center; align-items: center;
+      margin: 0 auto 1rem;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 15px rgba(99, 102, 241, 0.4);
+    }
+    .step-box h4 { font-size: 1.05rem; margin-bottom: 0.4rem; color: white; }
+    .step-box p { font-size: 0.85rem; color: var(--muted); }
+
+    /* Footer */
+    footer {
+      background: var(--card-bg);
+      color: var(--muted);
+      text-align: center;
+      padding: 2.5rem 1.5rem;
+      border-top: 1px solid var(--border);
+      margin-top: auto;
+    }
+
+    @media (max-width: 768px) {
+      .navbar { padding: 1rem; flex-direction: column; gap: 1rem; }
+      .hero h1 { font-size: 2.2rem; }
+      .hero-search-bar { grid-template-columns: 1fr; }
+      .search-field { border-right: none; border-bottom: 1px solid var(--border); padding-bottom: 0.5rem; }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Smart Navigation Bar -->
+  <nav class="navbar">
+    <a href="index.html" class="nav-brand"><i class="fas fa-car"></i> RENT YOUR PERFECT RIDE</a>
+    <ul class="nav-links" id="nav-menu-links">
+      <!-- Populated dynamically via JS -->
+    </ul>
+    <div class="nav-actions" id="nav-user-actions">
+      <!-- Populated dynamically via JS -->
+    </div>
+  </nav>
+
+  <!-- Hero Section -->
+  <section class="hero">
+    <div class="hero-badge"><i class="fas fa-sparkles"></i> Premium Car Rental Experience</div>
+    <h1>Drive Comfortably, Arrive Confidently</h1>
+    <p>Discover clean, reliable, and affordable vehicles for long trips, city drives, and business travel across the country.</p>
+
+    <!-- Search & Quick Filter Bar -->
+    <div class="hero-search-bar">
+      <div class="search-field">
+        <label><i class="fas fa-search"></i> Search Vehicle</label>
+        <input type="text" id="home-search-input" placeholder="e.g. Vios, Fortuner, Hiace..." oninput="filterFleet()">
+      </div>
+      <div class="search-field">
+        <label><i class="fas fa-filter"></i> Transmission</label>
+        <select id="home-type-select" onchange="filterFleet()">
+          <option value="ALL">All Types</option>
+          <option value="Automatic">Automatic</option>
+          <option value="Manual">Manual</option>
+        </select>
+      </div>
+      <div class="search-field" style="justify-content: center; align-items: stretch;">
+        <button class="btn btn-primary" style="justify-content: center; height: 100%;" onclick="handleReserveAction('vehicles.html')">
+          Browse All <i class="fas fa-arrow-right"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Vehicles Section -->
+  <section class="section-container">
+    <div class="section-title-box">
+      <h2>Featured Vehicle Fleet</h2>
+      <p>Hand-picked, well-maintained rides available for instant reservation today.</p>
+    </div>
+    
+    <div class="vehicle-grid" id="featured-grid">
+      <!-- Dynamic car cards rendered via JavaScript -->
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section class="section-container" style="background: rgba(30, 41, 59, 0.4); border-radius: var(--radius);">
+    <div class="section-title-box">
+      <h2>How It Works</h2>
+      <p>Renting a vehicle with us is simple, fast, and completely hassle-free.</p>
+    </div>
+    
+    <div class="steps-container">
+      <div class="step-box">
+        <div class="step-number">1</div>
+        <h4>Choose Your Car</h4>
+        <p>Explore our wide selection of sedans, SUVs, vans, and pickups.</p>
+      </div>
+      <div class="step-box">
+        <div class="step-number">2</div>
+        <h4>Select Schedule</h4>
+        <p>Pick your rental duration, pick-up dates, and convenient drop-off times.</p>
+      </div>
+      <div class="step-box">
+        <div class="step-number">3</div>
+        <h4>Instant Confirmation</h4>
+        <p>Complete your booking securely and get instant digital confirmation.</p>
+      </div>
+      <div class="step-box">
+        <div class="step-number">4</div>
+        <h4>Hit The Road</h4>
+        <p>Pick up your keys and enjoy a smooth, safe ride to your destination.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Why Choose Us -->
+  <section class="section-container">
+    <div class="section-title-box">
+      <h2>Why Choose Us</h2>
+      <p>We deliver an exceptional rental experience with zero compromise on safety or comfort.</p>
+    </div>
+
+    <div class="features-grid">
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-shield-alt"></i></div>
+        <h3>Fully Insured & Sanitized</h3>
+        <p>Every vehicle undergoes strict safety checks and complete interior sanitization before every trip.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-tags"></i></div>
+        <h3>Transparent Pricing</h3>
+        <p>No hidden charges or surprise fees. What you see is exactly what you pay for your daily rate.</p>
+      </div>
+      <div class="feature-card">
+        <div class="feature-icon"><i class="fas fa-headset"></i></div>
+        <h3>24/7 Road Assistance</h3>
+        <p>Our dedicated support team and roadside assistance are always on standby to support your trip.</p>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Rent Your Perfect Ride. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    const userRole = localStorage.getItem('userRole');
+    const userName = localStorage.getItem('userName');
+
+    // Default Fleet Data mapped to local car_image folder
+    const defaultFleet = [
+      { id: '1', name: 'Toyota Vios', rate: 1500, seats: 5, type: 'Automatic', image: 'car_image/vios.avif' },
+      { id: '2', name: 'Mitsubishi Mirage G4', rate: 1400, seats: 5, type: 'Manual / Auto', image: 'car_image/mirage.jpeg' },
+      { id: '3', name: 'Toyota Hiace', rate: 3500, seats: 12, type: 'Manual', image: 'car_image/hiace.jpeg' },
+      { id: '4', name: 'Toyota Fortuner', rate: 4500, seats: 7, type: 'Automatic', image: 'car_image/fortuner.jpeg' },
+      { id: '5', name: 'Mitsubishi Xpander', rate: 2800, seats: 7, type: 'Automatic', image: 'car_image/xpander.jpeg' },
+      { id: '6', name: 'Multicab Pick-up', rate: 2000, seats: 2, type: 'Manual', image: 'car_image/pickup.jpeg' }
+    ];
+
+    function getFleet() {
+      let fleet = JSON.parse(localStorage.getItem('vehicleFleet'));
+      if (!fleet) {
+        fleet = defaultFleet;
+        localStorage.setItem('vehicleFleet', JSON.stringify(fleet));
+      }
+      return fleet;
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      setupNavbar();
+      renderFeaturedGrid();
+    });
+
+    // Guard handler when clicking reserve/browse while unauthenticated
+    function handleReserveAction(targetUrl) {
+      if (!userName) {
+        alert('⚠️ Please sign in first to access the vehicle catalog and booking pages.');
+        window.location.href = 'login.html';
+      } else {
+        window.location.href = targetUrl;
+      }
+    }
+
+    // Dynamic Navigation bar state
+    function setupNavbar() {
+      const actions = document.getElementById('nav-user-actions');
+      const links = document.getElementById('nav-menu-links');
+
+      if (userName) {
+        if (userRole === 'admin') {
+          links.innerHTML = `
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="vehicles.html">Manage Fleet</a></li>
+            <li><a href="admin-dashboard.html">Admin Overview</a></li>
+          `;
+        } else {
+          // Logged-in Customer receives full navigation links
+          links.innerHTML = `
+            <li><a href="index.html" class="active">Home</a></li>
+            <li><a href="vehicles.html">Vehicles</a></li>
+            <li><a href="dashboard.html">Dashboard</a></li>
+            <li><a href="transactions.html">My Bookings</a></li>
+            <li><a href="payment.html">Payment</a></li>
+          `;
+        }
+
+        actions.innerHTML = `
+          <span style="font-weight: 600; color: #93c5fd; font-size: 0.9rem;">
+            <i class="fas fa-user-circle"></i> Hello, ${userName}
+          </span>
+          <button onclick="logout()" class="btn btn-outline" style="padding: 0.4rem 0.9rem; font-size: 0.85rem;">
+            <i class="fas fa-sign-out-alt"></i> Logout
+          </button>
+        `;
+      } else {
+        // Logged-out view: Only Home is displayed in links, and only Sign In in actions
+        links.innerHTML = `
+          <li><a href="index.html" class="active">Home</a></li>
+        `;
+
+        actions.innerHTML = `
+          <a href="login.html" class="btn btn-outline"><i class="fas fa-sign-in-alt"></i> Sign In</a>
+        `;
+      }
+    }
+
+    function logout() {
+      localStorage.removeItem('userRole');
+      localStorage.removeItem('userName');
+      window.location.reload();
+    }
+
+    // Render Fleet Grid
+    function renderFeaturedGrid() {
+      const fleet = getFleet();
+      const grid = document.getElementById('featured-grid');
+
+      grid.innerHTML = fleet.map(car => {
+        return `
+          <div class="vehicle-card" data-name="${car.name.toLowerCase()}" data-type="${car.type.toLowerCase()}">
+            <div class="vehicle-img-container">
+              <img src="${car.image}" alt="${car.name}" onerror="this.src='car_image/pickup.jpeg'">
+            </div>
+            <div class="vehicle-body">
+              <div class="vehicle-title">${car.name}</div>
+              <div class="vehicle-price">₱${Number(car.rate).toLocaleString()} <span style="font-size:0.8rem; color:var(--muted); font-weight:normal;">/ day</span></div>
+              <div class="vehicle-specs">
+                <div><i class="fas fa-user-friends"></i> ${car.seats} Seats</div>
+                <div><i class="fas fa-cog"></i> ${car.type}</div>
+              </div>
+              <div class="vehicle-actions" style="margin-top:auto;">
+                <button class="btn btn-primary" style="width:100%; justify-content:center;" 
+                  onclick="handleReserveAction('vehicles.html')">
+                  <i class="fas fa-car-side"></i> Reserve Now
+                </button>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function filterFleet() {
+      const query = document.getElementById('home-search-input').value.toLowerCase().trim();
+      const typeFilter = document.getElementById('home-type-select').value.toLowerCase();
+      const cards = document.querySelectorAll('#featured-grid .vehicle-card');
+
+      cards.forEach(card => {
+        const carName = card.getAttribute('data-name');
+        const carType = card.getAttribute('data-type');
+
+        const matchesQuery = carName.includes(query);
+        const matchesType = typeFilter === 'all' || carType.includes(typeFilter);
+
+        if (matchesQuery && matchesType) {
+          card.style.display = 'flex';
+        } else {
+          card.style.display = 'none';
+        }
+      });
+    }
+  </script>
+</body>
+</html> 

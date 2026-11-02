@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Transaction History - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #1a73e8;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --danger: #ef4444;
+      --dark: #0f172a;
+      --card: #1e293b;
+      --muted: #94a3b8;
+      --light: #f8fafc;
+      --shadow-sm: 0 2px 8px rgba(0,0,0,0.15);
+      --radius: 12px;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+    body { background: var(--dark); color: var(--light); min-height: 100vh; }
+
+    .dashboard-container { display: flex; min-height: 100vh; }
+    .sidebar {
+      width: 260px; background: var(--card); padding: 2rem 1.5rem;
+      display: flex; flex-direction: column; gap: 2.5rem;
+      position: fixed; top: 0; bottom: 0; left: 0; box-shadow: var(--shadow-sm);
+    }
+    .sidebar-logo { font-size: 1.3rem; font-weight: 700; color: var(--primary); display: flex; align-items: center; gap: 0.75rem; }
+    .sidebar-menu { list-style: none; display: flex; flex-direction: column; gap: 0.5rem; }
+    .sidebar-menu li a {
+      display: flex; align-items: center; gap: 0.75rem; padding: 0.9rem 1rem;
+      border-radius: 8px; color: var(--muted); text-decoration: none; transition: all 0.25s ease;
+    }
+    .sidebar-menu li a:hover { background: rgba(26,115,232,0.15); color: var(--light); }
+    .sidebar-menu li a.active { background: var(--primary); color: white; font-weight: 600; }
+    .sidebar-menu li:last-child { margin-top: auto; }
+    .sidebar-menu li a#logout-link { color: var(--danger); }
+    .sidebar-menu li a#logout-link:hover { background: rgba(239,68,68,0.15); color: var(--danger); }
+
+    .main-content { flex: 1; margin-left: 260px; padding: 2.5rem; }
+    .page-header { margin-bottom: 2rem; }
+    .page-header h1 { font-size: 1.8rem; margin-bottom: 0.3rem; }
+    .page-header p { color: var(--muted); }
+
+    .card {
+      background: var(--card); border-radius: var(--radius); padding: 2rem;
+      box-shadow: var(--shadow-sm); margin-bottom: 1.5rem;
+    }
+    .card h2 { 
+      font-size: 1.25rem; margin-bottom: 1.5rem; 
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+
+    .transaction-item {
+      border: 1px solid #334155; 
+      padding: 1.25rem; 
+      margin: 0.75rem 0; 
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .transaction-item:hover {
+      border-color: var(--primary);
+      background: rgba(26,115,232,0.05);
+    }
+    .transaction-item p { margin: 0.4rem 0; font-size: 0.95rem; }
+    .transaction-item strong { color: #cbd5e1; min-width: 100px; display: inline-block; }
+    .empty-state { color: var(--muted); text-align: center; padding: 2rem; }
+
+    .footer-contact { 
+      margin-top: 2rem; text-align: center; padding-top: 2rem; 
+      border-top: 1px solid #334155; color: var(--muted);
+    }
+    .footer-contact p { margin: 0.4rem 0; }
+    .footer-contact strong { color: white; }
+
+    @media (max-width: 768px) {
+      .sidebar { position: relative; width: 100%; flex-direction: row; padding: 1rem; overflow-x: auto; }
+      .sidebar-menu { flex-direction: row; gap: 0.25rem; }
+      .dashboard-container { flex-direction: column; }
+      .main-content { margin-left: 0; padding: 1.5rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="dashboard-container">
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="sidebar-logo"><i class="fas fa-car"></i> RYPR</div>
+      <ul class="sidebar-menu">
+        <li><a href="dashboard.html"><i class="fas fa-tachometer-alt"></i> Dashboard</a></li>
+        <li><a href="vehicles.html"><i class="fas fa-car"></i> Book a Vehicle</a></li>
+        <li><a href="transactions.html" class="active"><i class="fas fa-history"></i> My Bookings</a></li>
+        <li><a href="payment.html"><i class="fas fa-credit-card"></i> Payments</a></li>
+        <li><a href="#" id="logout-link"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+      </ul>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content">
+      <div class="page-header">
+        <h1>Transaction History 📋</h1>
+        <p>View your booking and payment records</p>
+      </div>
+
+      <div class="card">
+        <h2><i class="fas fa-list-alt" style="color: var(--primary);"></i> Transaction History</h2>
+        <div id="transaction-list"></div>
+      </div>
+
+      <!-- Footer Contact -->
+      <div class="footer-contact">
+        <p><strong>Customer Service:</strong> 0920-600-7621</p>
+        <p><strong>Email:</strong> carrental@ph.com</p>
+        <p style="margin-top: 1rem; font-size: 0.85rem;">&copy; 2026 Rent Your Perfect Ride. All Rights Reserved.</p>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    function loadTransactions() {
+      const records = JSON.parse(localStorage.getItem('transactionRecords') || '[]');
+      const list = document.getElementById('transaction-list');
+      
+      if (records.length === 0) {
+        list.innerHTML = '<p class="empty-state"><i class="fas fa-inbox" style="font-size:1.5rem; opacity:0.5;"></i><br>No transactions yet.</p>';
+        return;
+      }
+      
+      list.innerHTML = records.map(tx => `
+        <div class="transaction-item">
+          <p><strong>Transaction ID:</strong> ${tx.transactionId}</p>
+          <p><strong>Vehicle:</strong> ${tx.vehicle}</p>
+          <p><strong>Name:</strong> ${tx.fullName}</p>
+          <p><strong>Total Amount:</strong> ₱${Number(tx.totalAmount).toLocaleString('en-PH', {minimumFractionDigits:2})}</p>
+          <p><strong>Date & Time:</strong> ${new Date(tx.timestamp).toLocaleString()}</p>
+          <p><strong>Status:</strong> ✅ ${tx.status}</p>
+        </div>
+      `).join('');
+    }
+
+    // Clear data on logout
+    document.getElementById('logout-link').addEventListener('click', function(e) {
+      e.preventDefault();
+      localStorage.removeItem('userName');
+      window.location.href = 'index.html';
+    });
+
+    document.addEventListener('DOMContentLoaded', loadTransactions);
+  </script>
+</body>
+</html>

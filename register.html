@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Create Account - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="styles.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    .step-indicator { display: flex; justify-content: space-between; margin-bottom: 2rem; position: relative; }
+    .step-indicator::before { content: ''; position: absolute; top: 14px; left: 10%; right: 10%; height: 2px; background: #e5e7eb; z-index: 1; }
+    .step { display: flex; flex-direction: column; align-items: center; position: relative; z-index: 2; }
+    .step-number { width: 32px; height: 32px; border-radius: 50%; background: #e5e7eb; color: #6b7280; display: flex; align-items: center; justify-content: center; font-weight: 700; margin-bottom: 0.3rem; transition: all 0.3s; }
+    .step.active .step-number { background: var(--primary); color: white; }
+    .step.completed .step-number { background: var(--success); color: white; }
+    .step-label { font-size: 0.7rem; color: #6b7280; text-align: center; max-width: 70px; }
+    .step.active .step-label { color: var(--primary); font-weight: 600; }
+    .step-content { display: none; }
+    .step-content.active { display: block; animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+    .btn-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+    .btn-group .btn { flex: 1; }
+    .checkbox-label { display: flex; align-items: flex-start; gap: 0.5rem; font-weight: normal; line-height: 1.4; }
+  </style>
+</head>
+<body>
+  <nav class="navbar">
+    <div class="nav-brand"><i class="fas fa-car"></i> RENT YOUR PERFECT RIDE</div>
+    <ul class="nav-links">
+      <li><a href="index.html">Home</a></li>
+      <li><a href="vehicles.html">Vehicles</a></li>
+      <li><a href="dashboard.html">Dashboard</a></li>
+    </ul>
+    <div class="nav-actions">
+      <a href="login.html" class="btn btn-outline">Login</a>
+      <a href="register.html" class="btn btn-primary active">Sign Up</a>
+    </div>
+  </nav>
+
+  <section class="section">
+    <div class="form-card" style="max-width: 520px; margin: 0 auto;">
+      <h2 style="text-align: center; margin-bottom: 0.5rem;">Create Your Account</h2>
+      <p style="text-align: center; color: var(--gray); margin-bottom: 1.5rem;">Join us and start renting your perfect ride</p>
+
+      <!-- Step Progress Bar -->
+      <div class="step-indicator">
+        <div class="step active" id="step-1-indicator">
+          <div class="step-number">1</div>
+          <span class="step-label">Personal Info</span>
+        </div>
+        <div class="step" id="step-2-indicator">
+          <div class="step-number">2</div>
+          <span class="step-label">Account</span>
+        </div>
+        <div class="step" id="step-3-indicator">
+          <div class="step-number">3</div>
+          <span class="step-label">Security</span>
+        </div>
+        <div class="step" id="step-4-indicator">
+          <div class="step-number">4</div>
+          <span class="step-label">Confirm</span>
+        </div>
+      </div>
+
+      <form id="register-form">
+        <!-- Step 1: Personal Information -->
+        <div class="step-content active" id="step-1">
+          <h3 style="margin-bottom: 1.2rem;"><i class="fas fa-user-circle" style="color: var(--primary);"></i> Personal Information</h3>
+          
+          <div class="form-group">
+            <label for="fullname"><i class="fas fa-user"></i> Full Name <span style="color:red">*</span></label>
+            <input type="text" id="fullname" placeholder="Juan Dela Cruz" required>
+          </div>
+
+          <div class="form-group">
+            <label for="phone"><i class="fas fa-mobile-alt"></i> Phone Number <span style="color:red">*</span></label>
+            <input type="tel" id="phone" placeholder="09XX-XXX-XXXX" required>
+          </div>
+
+          <div class="form-group">
+            <label for="address"><i class="fas fa-map-marker-alt"></i> Complete Address</label>
+            <input type="text" id="address" placeholder="Barangay, City, Province">
+          </div>
+
+          <div class="form-group">
+            <label for="birthdate"><i class="fas fa-birthday-cake"></i> Birthdate <span style="color:red">*</span></label>
+            <input type="date" id="birthdate" required>
+            <small style="color: var(--gray);">Must be at least 21 years old to rent</small>
+          </div>
+
+          <button type="button" class="btn btn-primary btn-full" onclick="goToStep(2)">
+            Next <i class="fas fa-chevron-right"></i>
+          </button>
+        </div>
+
+        <!-- Step 2: Account Details -->
+        <div class="step-content" id="step-2">
+          <h3 style="margin-bottom: 1.2rem;"><i class="fas fa-id-card" style="color: var(--primary);"></i> Account Details</h3>
+          
+          <div class="form-group">
+            <label for="email"><i class="fas fa-envelope"></i> Email Address <span style="color:red">*</span></label>
+            <input type="email" id="email" placeholder="your@email.com" required>
+          </div>
+
+          <div class="form-group">
+            <label for="password"><i class="fas fa-lock"></i> Password <span style="color:red">*</span></label>
+            <input type="password" id="password" placeholder="At least 6 characters" required minlength="6">
+          </div>
+
+          <div class="form-group">
+            <label for="confirm-password"><i class="fas fa-lock"></i> Confirm Password <span style="color:red">*</span></label>
+            <input type="password" id="confirm-password" placeholder="Re-enter password" required>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline" onclick="goToStep(1)">
+              <i class="fas fa-chevron-left"></i> Back
+            </button>
+            <button type="button" class="btn btn-primary" onclick="goToStep(3)">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 3: Security Question -->
+        <div class="step-content" id="step-3">
+          <h3 style="margin-bottom: 1.2rem;"><i class="fas fa-shield-alt" style="color: var(--primary);"></i> Security Question</h3>
+          <p style="color: var(--gray); margin-bottom: 1rem;">Used to verify your identity if you forget your password</p>
+          
+          <div class="form-group">
+            <label for="security-question"><i class="fas fa-question-circle"></i> Choose a Question <span style="color:red">*</span></label>
+            <select id="security-question" required>
+              <option value="">-- Select one --</option>
+              <option>What is your mother's maiden name?</option>
+              <option>What was the name of your first pet?</option>
+              <option>What is your birthplace city?</option>
+              <option>What is your favorite color?</option>
+              <option>What elementary school did you attend?</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label for="security-answer"><i class="fas fa-key"></i> Your Answer <span style="color:red">*</span></label>
+            <input type="text" id="security-answer" placeholder="Enter your answer" required>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline" onclick="goToStep(2)">
+              <i class="fas fa-chevron-left"></i> Back
+            </button>
+            <button type="button" class="btn btn-primary" onclick="goToStep(4)">
+              Next <i class="fas fa-chevron-right"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 4: Review & Submit -->
+        <div class="step-content" id="step-4">
+          <h3 style="margin-bottom: 1.2rem;"><i class="fas fa-check-circle" style="color: var(--success);"></i> Review & Submit</h3>
+          
+          <div style="background: #f3f4f6; padding: 1.2rem; border-radius: 8px; margin-bottom: 1.5rem;">
+            <p><strong>Name:</strong> <span id="review-name"></span></p>
+            <p><strong>Email:</strong> <span id="review-email"></span></p>
+            <p><strong>Phone:</strong> <span id="review-phone"></span></p>
+            <p><strong>Birthdate:</strong> <span id="review-birthdate"></span></p>
+            <p><strong>Security Question:</strong> <span id="review-question"></span></p>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-label">
+              <input type="checkbox" id="agree-terms" required>
+              I have read and agree to the <a href="terms.html" target="_blank" style="color: var(--primary); font-weight: 600;">Terms & Conditions</a> and <a href="#" style="color: var(--primary); font-weight: 600;">Privacy Policy</a> <span style="color:red">*</span>
+            </label>
+          </div>
+
+          <div class="btn-group">
+            <button type="button" class="btn btn-outline" onclick="goToStep(3)">
+              <i class="fas fa-chevron-left"></i> Back
+            </button>
+            <button type="submit" class="btn btn-primary">
+              <i class="fas fa-user-check"></i> Create Account
+            </button>
+          </div>
+        </div>
+      </form>
+
+      <p style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid #eee;">
+        Already have an account? <a href="login.html" style="color: var(--primary); font-weight: 600;">Sign In</a>
+      </p>
+    </div>
+  </section>
+
+  <footer>
+    <p>&copy; 2026 Rent Your Perfect Ride. All Rights Reserved.</p>
+  </footer>
+
+  <script>
+    let currentStep = 1;
+
+    function goToStep(step) {
+      // Validation before moving forward
+      if (step > currentStep) {
+        if (!validateStep(currentStep)) return;
+      }
+
+      // Update step content visibility
+      document.querySelectorAll('.step-content').forEach(c => c.classList.remove('active'));
+      document.getElementById(`step-${step}`).classList.add('active');
+
+      // Update step indicators
+      for (let i = 1; i <= 4; i++) {
+        const indicator = document.getElementById(`step-${i}-indicator`);
+        indicator.classList.remove('active', 'completed');
+        if (i < step) indicator.classList.add('completed');
+        else if (i === step) indicator.classList.add('active');
+      }
+
+      // Populate review on final step
+      if (step === 4) {
+        document.getElementById('review-name').textContent = document.getElementById('fullname').value;
+        document.getElementById('review-email').textContent = document.getElementById('email').value;
+        document.getElementById('review-phone').textContent = document.getElementById('phone').value;
+        document.getElementById('review-birthdate').textContent = document.getElementById('birthdate').value;
+        document.getElementById('review-question').textContent = document.getElementById('security-question').value;
+      }
+
+      currentStep = step;
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function validateStep(step) {
+      if (step === 1) {
+        const name = document.getElementById('fullname').value.trim();
+        const phone = document.getElementById('phone').value.trim();
+        const birthdate = document.getElementById('birthdate').value;
+        
+        if (!name) { alert('❌ Please enter your full name.'); return false; }
+        if (!phone) { alert('❌ Please enter your phone number.'); return false; }
+        if (!birthdate) { alert('❌ Please select your birthdate.'); return false; }
+        
+        // Age check
+        const birth = new Date(birthdate);
+        const today = new Date();
+        const age = today.getFullYear() - birth.getFullYear() - (today < new Date(birth.setFullYear(today.getFullYear() - birth.getFullYear())) ? 1 : 0);
+        if (age < 21) { alert('❌ You must be at least 21 years old to rent a vehicle.'); return false; }
+      }
+      
+      if (step === 2) {
+        const email = document.getElementById('email').value.trim();
+        const pass = document.getElementById('password').value;
+        const confirmPass = document.getElementById('confirm-password').value;
+        
+        if (!email) { alert('❌ Please enter your email.'); return false; }
+        if (pass.length < 6) { alert('❌ Password must be at least 6 characters.'); return false; }
+        if (pass !== confirmPass) { alert('❌ Passwords do not match!'); return false; }
+      }
+      
+      if (step === 3) {
+        const question = document.getElementById('security-question').value;
+        const answer = document.getElementById('security-answer').value.trim();
+        
+        if (!question) { alert('❌ Please select a security question.'); return false; }
+        if (!answer) { alert('❌ Please provide an answer.'); return false; }
+      }
+      
+      return true;
+    }
+
+    // Final submission
+    document.getElementById('register-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      if (!document.getElementById('agree-terms').checked) {
+        alert('❌ Please agree to the Terms & Conditions.');
+        return;
+      }
+
+      const userData = {
+        fullname: document.getElementById('fullname').value.trim(),
+        email: document.getElementById('email').value.trim(),
+        phone: document.getElementById('phone').value.trim(),
+        address: document.getElementById('address').value.trim(),
+        birthdate: document.getElementById('birthdate').value,
+        password: document.getElementById('password').value,
+        recoveryQuestion: document.getElementById('security-question').value,
+        recoveryAnswer: document.getElementById('security-answer').value.trim().toLowerCase()
+      };
+
+      localStorage.setItem('userData', JSON.stringify(userData));
+      localStorage.setItem('userName', userData.fullname);
+      
+      alert(`✅ Account created successfully!\n\nWelcome, ${userData.fullname}! 🎉`);
+      window.location.href = 'dashboard.html';
+    });
+  </script>
+</body>
+</html>

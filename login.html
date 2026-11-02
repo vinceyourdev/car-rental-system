@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Account Access - Rent Your Perfect Ride</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.0/css/all.min.css">
+  <style>
+    :root {
+      --primary: #2563eb;
+      --secondary: #0f172a;
+      --light: #f8fafc;
+      --card-bg: #1e293b;
+      --border: #334155;
+      --muted: #94a3b8;
+      --step-inactive: #334155;
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', Roboto, sans-serif; }
+    body {
+      background: var(--secondary);
+      color: var(--light);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 1.5rem;
+      position: relative;
+    }
+    
+    /* Back to Home Link */
+    .back-home {
+      position: absolute;
+      top: 1.5rem;
+      left: 1.5rem;
+      color: var(--muted);
+      text-decoration: none;
+      font-weight: 600;
+      font-size: 0.9rem;
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      transition: color 0.2s;
+    }
+    .back-home:hover { color: var(--light); }
+
+    .login-card {
+      background: var(--card-bg);
+      padding: 2.5rem;
+      border-radius: 12px;
+      width: 100%;
+      max-width: 520px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+      border: 1px solid var(--border);
+    }
+    .brand { text-align: center; margin-bottom: 1.5rem; }
+    .brand h1 { font-size: 1.5rem; color: var(--primary); display: flex; justify-content: center; align-items: center; gap: 0.5rem; }
+    .brand p { color: var(--muted); font-size: 0.9rem; margin-top: 0.3rem; }
+
+    /* Tab Switcher for Sign In / Sign Up */
+    .auth-tabs {
+      display: flex;
+      background: #0f172a;
+      border-radius: 8px;
+      padding: 4px;
+      margin-bottom: 1.5rem;
+      border: 1px solid var(--border);
+    }
+    .tab-btn {
+      flex: 1;
+      padding: 0.6rem;
+      background: transparent;
+      border: none;
+      color: var(--muted);
+      font-weight: 600;
+      font-size: 0.9rem;
+      border-radius: 6px;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: white;
+    }
+
+    .form-container { display: none; }
+    .form-container.active { display: block; }
+
+    /* 4-Step Indicator Bar */
+    .step-indicator-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 2rem;
+      position: relative;
+      padding: 0 0.5rem;
+    }
+    .step-line {
+      position: absolute;
+      top: 16px;
+      left: 12%;
+      right: 12%;
+      height: 2px;
+      background: var(--step-inactive);
+      z-index: 1;
+    }
+    .step-item {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 0.3rem;
+    }
+    .step-circle {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: #0f172a;
+      border: 2px solid var(--step-inactive);
+      color: var(--muted);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: all 0.3s ease;
+    }
+    .step-label {
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: var(--muted);
+    }
+    .step-item.active .step-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .step-item.active .step-label {
+      color: white;
+    }
+    .step-item.completed .step-circle {
+      background: #10b981;
+      border-color: #10b981;
+      color: white;
+    }
+    .step-item.completed .step-label {
+      color: #10b981;
+    }
+
+    .form-step { display: none; }
+    .form-step.active { display: block; }
+
+    .form-group { margin-bottom: 1.25rem; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--muted); margin-bottom: 0.4rem; }
+    .form-group label span { color: #ef4444; }
+    .form-group input {
+      width: 100%; padding: 0.8rem; background: #0f172a; border: 1px solid var(--border);
+      border-radius: 8px; color: white; font-size: 0.95rem;
+    }
+    .form-group input:focus { outline: none; border-color: var(--primary); }
+    .helper-text { font-size: 0.75rem; color: var(--muted); margin-top: 0.3rem; }
+
+    .btn-group { display: flex; gap: 1rem; margin-top: 1.5rem; }
+    .btn {
+      width: 100%; padding: 0.85rem; background: var(--primary); color: white; border: none;
+      border-radius: 8px; font-weight: 600; font-size: 1rem; cursor: pointer; transition: background 0.2s;
+      display: flex; justify-content: center; align-items: center; gap: 0.5rem;
+    }
+    .btn:hover { background: #1d4ed8; }
+    .btn-secondary { background: #334155; }
+    .btn-secondary:hover { background: #475569; }
+
+    .summary-box {
+      background: #0f172a;
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.25rem;
+    }
+    .summary-item {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.5rem;
+      font-size: 0.85rem;
+    }
+    .summary-item:last-child { margin-bottom: 0; }
+    .summary-label { color: var(--muted); }
+    .summary-value { color: white; font-weight: 600; }
+  </style>
+</head>
+<body>
+
+  <!-- Back to Home navigation -->
+  <a href="index.html" class="back-home"><i class="fas fa-arrow-left"></i> Back to Home</a>
+
+  <div class="login-card">
+    <div class="brand">
+      <h1><i class="fas fa-car"></i> RYPR RENTALS</h1>
+      <p id="brand-subtitle">Sign in to your account</p>
+    </div>
+
+    <!-- Toggle Tabs -->
+    <div class="auth-tabs">
+      <button class="tab-btn active" id="signin-tab-btn" onclick="switchTab('signin')">Sign In</button>
+      <button class="tab-btn" id="signup-tab-btn" onclick="switchTab('signup')">Sign Up</button>
+    </div>
+
+    <!-- Sign In Form -->
+    <form id="login-form" class="form-container active">
+      <div class="form-group">
+        <label>Username / Email</label>
+        <input type="text" id="login-username" placeholder="Enter username or email" required>
+      </div>
+      <div class="form-group">
+        <label>Password</label>
+        <input type="password" id="login-password" placeholder="Enter password" required>
+      </div>
+      <button type="submit" class="btn"><i class="fas fa-sign-in-alt"></i> Sign In</button>
+    </form>
+
+    <!-- 4-Step Sign Up Form -->
+    <form id="signup-form" class="form-container">
+      
+      <!-- Step Indicator Bar -->
+      <div class="step-indicator-container">
+        <div class="step-line"></div>
+        <div class="step-item active" id="indicator-1">
+          <div class="step-circle">1</div>
+          <div class="step-label">Personal</div>
+        </div>
+        <div class="step-item" id="indicator-2">
+          <div class="step-circle">2</div>
+          <div class="step-label">Account</div>
+        </div>
+        <div class="step-item" id="indicator-3">
+          <div class="step-circle">3</div>
+          <div class="step-label">Security</div>
+        </div>
+        <div class="step-item" id="indicator-4">
+          <div class="step-circle">4</div>
+          <div class="step-label">Confirm</div>
+        </div>
+      </div>
+
+      <!-- STEP 1: Personal Info -->
+      <div class="form-step active" id="step-1">
+        <div class="form-group">
+          <label>Full Name <span>*</span></label>
+          <input type="text" id="reg-fullname" placeholder="Juan Dela Cruz">
+        </div>
+        <div class="form-group">
+          <label>Phone Number <span>*</span></label>
+          <input type="tel" id="reg-phone" placeholder="09XX-XXX-XXXX">
+        </div>
+        <div class="form-group">
+          <label>Complete Address <span>*</span></label>
+          <input type="text" id="reg-address" placeholder="Barangay, City, Province">
+        </div>
+        <div class="form-group">
+          <label>Birthdate <span>*</span></label>
+          <input type="date" id="reg-birthdate">
+          <div class="helper-text">Must be at least 21 years old to rent</div>
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn" onclick="nextStep(1)">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 2: Account Credentials -->
+      <div class="form-step" id="step-2">
+        <div class="form-group">
+          <label>Username <span>*</span></label>
+          <input type="text" id="reg-username" placeholder="Choose a unique username">
+        </div>
+        <div class="form-group">
+          <label>Email Address <span>*</span></label>
+          <input type="email" id="reg-email" placeholder="name@example.com">
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" onclick="prevStep(2)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn" onclick="nextStep(2)">Next <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 3: Security & Password -->
+      <div class="form-step" id="step-3">
+        <div class="form-group">
+          <label>Password <span>*</span></label>
+          <input type="password" id="reg-password" placeholder="Create a secure password">
+        </div>
+        <div class="form-group">
+          <label>Confirm Password <span>*</span></label>
+          <input type="password" id="reg-confirm-password" placeholder="Re-enter your password">
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" onclick="prevStep(3)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="button" class="btn" onclick="nextStep(3)">Review Details <i class="fas fa-arrow-right"></i></button>
+        </div>
+      </div>
+
+      <!-- STEP 4: Review & Confirmation -->
+      <div class="form-step" id="step-4">
+        <div class="summary-box">
+          <div class="summary-item">
+            <span class="summary-label">Full Name:</span>
+            <span class="summary-value" id="sum-name">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Phone:</span>
+            <span class="summary-value" id="sum-phone">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Username:</span>
+            <span class="summary-value" id="sum-username">-</span>
+          </div>
+          <div class="summary-item">
+            <span class="summary-label">Email:</span>
+            <span class="summary-value" id="sum-email">-</span>
+          </div>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn btn-secondary" onclick="prevStep(4)"><i class="fas fa-arrow-left"></i> Back</button>
+          <button type="submit" class="btn" style="background: #10b981;"><i class="fas fa-user-check"></i> Complete Sign Up</button>
+        </div>
+      </div>
+
+    </form>
+  </div>
+
+  <script>
+    let currentStep = 1;
+
+    // Tab Switching Logic
+    function switchTab(tab) {
+      const signinTab = document.getElementById('signin-tab-btn');
+      const signupTab = document.getElementById('signup-tab-btn');
+      const signinForm = document.getElementById('login-form');
+      const signupForm = document.getElementById('signup-form');
+      const subtitle = document.getElementById('brand-subtitle');
+
+      if (tab === 'signin') {
+        signinTab.classList.add('active');
+        signupTab.classList.remove('active');
+        signinForm.classList.add('active');
+        signupForm.classList.remove('active');
+        subtitle.textContent = 'Sign in to your account';
+      } else {
+        signupTab.classList.add('active');
+        signinTab.classList.remove('active');
+        signupForm.classList.add('active');
+        signinForm.classList.remove('active');
+        subtitle.textContent = 'Create your account';
+      }
+    }
+
+    function updateIndicators(step) {
+      for (let i = 1; i <= 4; i++) {
+        const indicator = document.getElementById(`indicator-${i}`);
+        indicator.classList.remove('active', 'completed');
+        if (i < step) {
+          indicator.classList.add('completed');
+          indicator.querySelector('.step-circle').innerHTML = '<i class="fas fa-check"></i>';
+        } else if (i === step) {
+          indicator.classList.add('active');
+          indicator.querySelector('.step-circle').textContent = i;
+        } else {
+          indicator.querySelector('.step-circle').textContent = i;
+        }
+      }
+    }
+
+    function nextStep(current) {
+      if (current === 1) {
+        const name = document.getElementById('reg-fullname').value.trim();
+        const phone = document.getElementById('reg-phone').value.trim();
+        const address = document.getElementById('reg-address').value.trim();
+        const bday = document.getElementById('reg-birthdate').value;
+
+        if (!name || !phone || !address || !bday) {
+          alert('⚠️ Please fill out all required personal information fields.');
+          return;
+        }
+      } else if (current === 2) {
+        const username = document.getElementById('reg-username').value.trim();
+        const email = document.getElementById('reg-email').value.trim();
+
+        if (!username || !email) {
+          alert('⚠️ Please provide a username and email address.');
+          return;
+        }
+      } else if (current === 3) {
+        const pass = document.getElementById('reg-password').value.trim();
+        const confirmPass = document.getElementById('reg-confirm-password').value.trim();
+
+        if (!pass || !confirmPass) {
+          alert('⚠️ Please fill out both password fields.');
+          return;
+        }
+        if (pass !== confirmPass) {
+          alert('⚠️ Passwords do not match!');
+          return;
+        }
+
+        // Populate Summary Page (Step 4)
+        document.getElementById('sum-name').textContent = document.getElementById('reg-fullname').value;
+        document.getElementById('sum-phone').textContent = document.getElementById('reg-phone').value;
+        document.getElementById('sum-username').textContent = document.getElementById('reg-username').value;
+        document.getElementById('sum-email').textContent = document.getElementById('reg-email').value;
+      }
+
+      document.getElementById(`step-${current}`).classList.remove('active');
+      currentStep = current + 1;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      updateIndicators(currentStep);
+    }
+
+    function prevStep(current) {
+      document.getElementById(`step-${current}`).classList.remove('active');
+      currentStep = current - 1;
+      document.getElementById(`step-${currentStep}`).classList.add('active');
+      updateIndicators(currentStep);
+    }
+
+    // Handle Sign In submission
+    document.getElementById('login-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const user = document.getElementById('login-username').value.trim();
+      const pass = document.getElementById('login-password').value.trim();
+
+      if (user.toLowerCase() === 'admin' && pass === 'admin123') {
+        localStorage.setItem('userRole', 'admin');
+        localStorage.setItem('userName', 'Administrator');
+        alert('Welcome back, Admin!');
+        window.location.href = 'admin-dashboard.html';
+        return;
+      }
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+      const matchedUser = users.find(u => (u.username === user || u.email === user) && u.password === pass);
+
+      if (matchedUser) {
+        localStorage.setItem('userRole', 'customer');
+        localStorage.setItem('userName', matchedUser.username);
+        alert(`Welcome back, ${matchedUser.username}!`);
+        window.location.href = 'dashboard.html';
+      } else {
+        localStorage.setItem('userRole', 'customer');
+        localStorage.setItem('userName', user);
+        alert(`Welcome, ${user}!`);
+        window.location.href = 'dashboard.html';
+      }
+    });
+
+    // Handle Final Sign Up Submission
+    document.getElementById('signup-form').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const username = document.getElementById('reg-username').value.trim();
+      const email = document.getElementById('reg-email').value.trim();
+      const password = document.getElementById('reg-password').value.trim();
+      const fullname = document.getElementById('reg-fullname').value.trim();
+      const phone = document.getElementById('reg-phone').value.trim();
+      const address = document.getElementById('reg-address').value.trim();
+
+      let users = JSON.parse(localStorage.getItem('registeredUsers')) || [];
+
+      if (users.some(u => u.username === username)) {
+        alert('⚠️ This username is already registered. Please go back and choose another.');
+        return;
+      }
+
+      users.push({ username, email, password, fullname, phone, address });
+      localStorage.setItem('registeredUsers', JSON.stringify(users));
+
+      alert('🎉 Account successfully created! You can now sign in.');
+      document.getElementById('signup-form').reset();
+      switchTab('signin');
+      document.getElementById('login-username').value = username;
+      
+      // Reset step indicator back to 1
+      currentStep = 1;
+      document.querySelectorAll('.form-step').forEach(s => s.classList.remove('active'));
+      document.getElementById('step-1').classList.add('active');
+      updateIndicators(1);
+    });
+  </script>
+
+</body>
+</html>
